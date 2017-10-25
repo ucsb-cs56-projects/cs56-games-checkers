@@ -11,7 +11,7 @@
   <property name="course" value="cs56" />
   <property name="quarter" value="W12" />
   <property name="issueNum" value="0000466" />
-  <property name="fullPkg" value="edu.ucsb.cs56.W12.ryankroner.issue466" />
+  <property name="fullPkg" value="edu.ucsb.cs56.projects.games.checkers" />
   <property name="mainClass" value="TextCheckers" />
   <property name="guiMainClass" value="CheckersGUI" />
 

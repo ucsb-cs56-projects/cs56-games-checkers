@@ -1,4 +1,4 @@
-package edu.ucsb.cs56.W12.ryankroner.issue466;
+package edu.ucsb.cs56.projects.games.checkers;
 import java.util.ArrayList;
 
 
@@ -339,7 +339,7 @@ public class CheckersBoard implements CheckersGame
 		//either moves the piece (if its valid) or sends an exception
 		
 		if(correctOwner(from) == false)	//makes sure that its the correct owner, otherwise throws an exception
-			throw new CheckersIllegalMoveException("Illegal Move, you do not own spot " + coordinates.get(from));
+			throw new CheckersIllegalMoveException("Illegal Move, you do not have a piece at spot " + coordinates.get(from));
 		
 		validSpots(from);	//sets all the corners to their proper numbers so we can check it against the parameter 'to'
 		

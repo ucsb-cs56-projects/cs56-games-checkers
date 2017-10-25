@@ -1,4 +1,4 @@
-package edu.ucsb.cs56.W12.ryankroner.issue466;
+package edu.ucsb.cs56.projects.games.checkers;
 import javax.swing.JTextArea;
 
  /**
