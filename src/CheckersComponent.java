@@ -1,4 +1,4 @@
-package edu.ucsb.cs56.W12.ryankroner.issue466;
+package edu.ucsb.cs56.projects.games.checkers;
 import java.awt.GridLayout;
 import javax.swing.JComponent;
 import javax.swing.JButton;
