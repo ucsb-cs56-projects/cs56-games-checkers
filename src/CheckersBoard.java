@@ -30,8 +30,8 @@ public class CheckersBoard implements CheckersGame
 	private int 			jumpSpotBL;				//index in array of jumped spot bottom left
 	private int 			jumpSpotBR;				//index in array of jumped spot bottom right
 	private boolean			jumped;					//true if jumped, false if didnt jump
-	private int				oCount = 12;				//count of o pieces
-	private int				xCount = 12;				//count of x pieces
+	private int			oCount = 12;				//count of o pieces
+	private int			xCount = 12;				//count of x pieces
 	private char			winner = ' ';				//will be ' ' until either 'x' or 'o' wins
 	private boolean 		canJump = false;			//false if you cant jump, true if you can
 	
@@ -452,7 +452,7 @@ public class CheckersBoard implements CheckersGame
 			winner = 'o';
 		}else if(oCount == 0){
 			System.out.println("X WINS!");
-			winner = 'o';
+			winner = 'x';
 		}
 	}//end move
 	
