@@ -112,21 +112,21 @@ public class CheckersBoard implements CheckersGame
 	 */
 	public boolean correctOwner(int i){
 		if(turn == 'x'){	//if its x's turn, makes sure the spot is owned by 'x'
-		if(pieces.get(i) == 'x' || pieces.get(i) == 'X'){
+		    if(pieces.get(i) == 'x' || pieces.get(i) == 'X'){
 			return true;
-		}else{
+		    }else{
 			return false;
+		    }
 		}
-	}
 		if(turn == 'o'){	//if its o's turn, makes sure the spot is owned by 'o'
-		if(pieces.get(i) == 'o' || pieces.get(i) == 'O'){
+		    if(pieces.get(i) == 'o' || pieces.get(i) == 'O'){
 			return true;
-		}else{
+		    }else{
 			return false;
+		    }
 		}
+		return false;
 	}
-	return false;
-}
 
 	/**Sets the topLeft variable to where you are able to move to (or -1 if you cant move to the top left)
 	 * @param from The spot where the current piece is
@@ -340,7 +340,7 @@ public class CheckersBoard implements CheckersGame
 		//either moves the piece (if its valid) or sends an exception
 		
 		if(correctOwner(from) == false)	//makes sure that its the correct owner, otherwise throws an exception
-		throw new CheckersIllegalMoveException("Illegal Move, you do not have a piece at spot " + coordinates.get(from));
+		    throw new CheckersIllegalMoveException("Illegal Move, you do not have a piece at spot " + coordinates.get(from));
 		
 		validSpots(from);	//sets all the corners to their proper numbers so we can check it against the parameter 'to'
 		
@@ -520,49 +520,31 @@ public class CheckersBoard implements CheckersGame
 	}//end toString()
 
 	public String cleanCoord(String s){
-		String r = s;
+	    String r = s, Spre, Ssuf;
+	    char Cpre, Csuf;
 
-		if (r.equals("b1") || r.equals("1B") || r.equals("1b")) r = "B1";
-		if (r.equals("d1") || r.equals("1D") || r.equals("1d")) r = "D1";
-		if (r.equals("f1") || r.equals("1F") || r.equals("1f")) r = "F1";
-		if (r.equals("h1") || r.equals("1H") || r.equals("1h")) r = "H1";
+	     // S isn't 2 chars, invalid, return entry
+	    if (r.length() != 2) return s;
 
-		if (r.equals("a2") || r.equals("2A") || r.equals("2a")) r = "A2";
-		if (r.equals("c2") || r.equals("2C") || r.equals("2c")) r = "C2";
-		if (r.equals("e2") || r.equals("2E") || r.equals("2e")) r = "E2";
-		if (r.equals("g2") || r.equals("2G") || r.equals("2g")) r = "G2";
+	    
+	    Cpre = r.charAt(0);
+	    Csuf = r.charAt(1);
+	    
+	    // First make sure that format is <Letter><Digit>
+	    if (Character.isDigit(Cpre) && Character.isLetter(Csuf)) { // Format is <Digit><Letter>, switch it
+		char temp = Csuf;
+		Csuf = Cpre;
+		Cpre = temp;
+	    }
 
-		if (r.equals("b3") || r.equals("3B") || r.equals("3b")) r = "B3";
-		if (r.equals("d3") || r.equals("3D") || r.equals("3d")) r = "D3";
-		if (r.equals("f3") || r.equals("3F") || r.equals("3f")) r = "F3";
-		if (r.equals("h3") || r.equals("3H") || r.equals("3h")) r = "H3";
+	    Spre = String.valueOf(Cpre);
+	    Ssuf = String.valueOf(Csuf);
 
-		if (r.equals("a4") || r.equals("4A") || r.equals("4a")) r = "A4";
-		if (r.equals("c4") || r.equals("4C") || r.equals("4c")) r = "C4";
-		if (r.equals("e4") || r.equals("4E") || r.equals("4e")) r = "E4";
-		if (r.equals("g4") || r.equals("4G") || r.equals("4g")) r = "G4";
+	    Spre = Spre.toUpperCase();
+	    
+	    r = Spre + Ssuf;
 
-		if (r.equals("b5") || r.equals("5B") || r.equals("5b")) r = "B5";
-		if (r.equals("d5") || r.equals("5D") || r.equals("5d")) r = "D5";
-		if (r.equals("f5") || r.equals("5F") || r.equals("5f")) r = "F5";
-		if (r.equals("h5") || r.equals("5H") || r.equals("5h")) r = "H5";
-
-		if (r.equals("a6") || r.equals("6A") || r.equals("6a")) r = "A6";
-		if (r.equals("c6") || r.equals("6C") || r.equals("6c")) r = "C6";
-		if (r.equals("e6") || r.equals("6E") || r.equals("6e")) r = "E6";
-		if (r.equals("g6") || r.equals("6G") || r.equals("6g")) r = "G6";
-
-		if (r.equals("b7") || r.equals("7B") || r.equals("7b")) r = "B7";
-		if (r.equals("d7") || r.equals("7D") || r.equals("7d")) r = "D7";
-		if (r.equals("f7") || r.equals("7F") || r.equals("7f")) r = "F7";
-		if (r.equals("h7") || r.equals("7H") || r.equals("7h")) r = "H7";
-
-		if (r.equals("a8") || r.equals("8A") || r.equals("8a")) r = "A8";
-		if (r.equals("c8") || r.equals("8C") || r.equals("8c")) r = "C8";
-		if (r.equals("e8") || r.equals("8E") || r.equals("8e")) r = "E8";
-		if (r.equals("g8") || r.equals("8G") || r.equals("8g")) r = "G8";
-
-		return r;
+	    return r;
 	}
 }//end class Checkers
 
