@@ -10,11 +10,15 @@ public class CheckersBoard2 implements CheckersGame
     private char turn = 'x'; //x alwayds starts
     private char opponent = 'o'; //always opposite of turn, starts as o
 
-    private int topLeft; //top left square of selected piece
-    private int topRight; //top right square of slelected piece
-    private int bottomLeft; //bottom left square of selected piece
-
-    private int bottomRight; //bottom right square of selected piece
+    private int x1 = -1; // possible x,y moves 
+    private int x2 = -1;
+    private int x4 = -1;
+    private int x4 = -1;
+    private int y1 = -1;
+    private int y2 = -1;
+    private int y3 = -1;
+    private int y4 = -1;
+    
     private int jumpToTL; //spot to jump to top left
     private int jumpToTR; //spot to jump to top right
     private int jumpToBL; //spot to jump to bottom left
@@ -28,15 +32,31 @@ public class CheckersBoard2 implements CheckersGame
     private char winner = ''; //changed to either x,o, or t at end of game
 
     private boolean canJump = false; //true if can jump, false if not
-
+    private boolean validMove = false;
 
     public CheckersBoard() {
 	//initalize checkers board
 	for(int i = 0; i < 8; i++) {
 	    for (int j = 0; j < 3; j++) {
-		if((i ^ j) & 1) pieces[i][j] = 'o'; // ^ xor &1 means only look at first bit so if the 1 bit doesnt match put an o
+		if((i ^ j) & 1) {
+		    pieces[i][j] = 'o'; // ^ xor &1 means only look at first bit so if the 1 bit doesnt match put an o
+		}
 	    }
-	}//end for loop
+	}//end for loop placing o's
+	for (int i = 0; i < 8; i++) {
+	    for (int j = 0; j > 4; j++) {
+		if((i ^ j) & 1) {
+		    pieces[i][j] = 'x';
+		}
+	    }
+	}//end for loop placing x's
+	for (int i = 0; i < 8; i++) {
+	    for (int j = 0; j < 8; j++) {
+		if(pieces[i][j] != 'o' || pieces[i][j] != 'x') {
+		    pieces[i][j] = ' ';
+		}
+	    }
+	}//end of placing empty squares
     }
 
     public char getTurn() { return turn; }
@@ -44,15 +64,6 @@ public class CheckersBoard2 implements CheckersGame
     public char getPiece(int row, int col) { return pieces[row][col] }
 
     public char getWinner() { return winner; }
-
-    /** Used by TextCheckers.java class for inputted coordinates of the user
-     * @see TextCheckers
-     * @param s A string to convert to coordinates in the array
-     * @return the index of the array so that spot can be accessed in pieces array
-     */
-    public int findCoordinates(String s) {
-	//same as clean coordinates?
-    }
 
     /**Checks if the index you are moving from is owned by the correct owner
      * @param i,j The index of the spot you are trying to move
@@ -78,19 +89,75 @@ public class CheckersBoard2 implements CheckersGame
 	return false;
     }
 
-    public void validMove(int i, int j) throws CheckersIllegalMoveException {
-	if (i > 7 || j > 3 || orrectOwner(i,j) == false) {
-	    throw new Checkers
-
     /** move method that allows the user to move
      * Will throw a CheckersIllegalMoveException if the from index is a spot that you don't own, or if you are trying to move to a spot that is not valid
      *  @param from the integer value of the index of the spot you are moving from
      *  @param to the integer value of the index of the spot you are moving to
      */
-    public void move(int from, int to) throws CheckersIllegalMoveException {
+    public void validMove(int fromI, int fromJ, int toI, int toJ) throws CheckersIllegalMoveException {
 
+	if (checkOwner(fromI, fromJ) == false) {
+	    throw CheckersIllegalMoveException("Thats not your piece");
+	}
+	if (turn == 'x') {
+	    x1 = fromI - 1; // up left
+	    y1 = fromI - 1;
+	    x2 = fromI - 1; // up right
+	    y2 = fromI + 1;
+	    if (pieces[fromI][fromJ] == 'X') { // if its a king
+	        x3 = fromI + 1; // back left
+		y3 = fromI - 1;
+		x4 = fromI + 1; // back right
+		y4 = fromI + 1;
+	    }
+	}
+	if (turn == 'o') {
+	    x1 = fromI + 1; // up right
+	    y1 = fromJ - 1;
+	    x2 = fromI + 1; // up left
+	    y2 = fromJ + 1;
+	    if (pieces[fromI][fromJ] == 'O') { // if its a king
+		x3 = fromI - 1; // back right
+		y3 = fromJ - 1;
+		x4 = fromI - 1; // back left
+		y4 = fromJ + 1;
+	    }
+	}
+	if (x1 > 7 || x2 > 7 || x3 > 7 || x4 > 7 || y1 > 7 || y2 > 7 || y3 > 7 || y4 > 7) { //check if out of bounds
+	    throw CheckersIllegalMoveException("You cant move off the board");
+	}
+	else if ((toI != x1 && toJ != y1) || (toI != x2 && toJ != y2) || (toI != x3 && toJ != y3) || (toI != x4 && toJ != y4)) { // check if 1 of 4 valid moves
+            throw CheckersIllegalMoveException("That's not a valid move");
+	}
+	else if ((if turn == 'o' && pieces[toI][toJ] == 'x') || (if turn == 'x' && pieces[toI][toJ] == 'o')) { //check if existing piece in spot
+	    checkJump(fromI, fromJ, toI, toJ);
+	}
+	else {
+	    validMove = true;
+	}
     }
-
+    public void checkJump(int fromI, int fromJ, int toI, int toJ) {
+	int jumpI, jumpJ;
+	if (turn == 'x') {
+	    if(toI == x1 && toJ == y1) {
+		jumpI = x1 - 1;
+		jumpJ = y1 - 1;
+	    }
+	    else if (toI == x2 && toJ == y2) {
+		jumpI = x2 - 1;
+		jumpJ = y2 + 1;
+	    }
+	    else if (toI == x3 && toJ == y3) {
+		jumpI = x3 + 1;
+		jumpJ = y3 - 1;
+	    }
+	    else if (toI == x4 && toJ == y4) {
+		jumpI = x4 + 1;
+		jumpJ = y4 + 1;
+	    }
+	}
+	if (turn == 'y'
+    }
     public int getOCount() { return oCount; }
     
     public int getXcount() { return xCount; }
