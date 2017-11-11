@@ -97,8 +97,9 @@ public class CheckersBoard implements CheckersGame
 	 * @return The index of the array so you can access that spot in the pieces array
 	 */
 	public int findCoordinates(String s){
+		String input = cleanCoord(s);
 		for(int i = 0; i < 32; i++){
-			if(s.equals(coordinates.get(i))){
+			if(input.equals(coordinates.get(i))){
 				return i;
 			}
 		}
@@ -111,22 +112,22 @@ public class CheckersBoard implements CheckersGame
 	 */
 	public boolean correctOwner(int i){
 		if(turn == 'x'){	//if its x's turn, makes sure the spot is owned by 'x'
-			if(pieces.get(i) == 'x' || pieces.get(i) == 'X'){
-				return true;
-			}else{
-				return false;
-			}
+		    if(pieces.get(i) == 'x' || pieces.get(i) == 'X'){
+			return true;
+		    }else{
+			return false;
+		    }
 		}
 		if(turn == 'o'){	//if its o's turn, makes sure the spot is owned by 'o'
-			if(pieces.get(i) == 'o' || pieces.get(i) == 'O'){
-				return true;
-			}else{
-				return false;
-			}
+		    if(pieces.get(i) == 'o' || pieces.get(i) == 'O'){
+			return true;
+		    }else{
+			return false;
+		    }
 		}
 		return false;
 	}
-	
+
 	/**Sets the topLeft variable to where you are able to move to (or -1 if you cant move to the top left)
 	 * @param from The spot where the current piece is
 	 * @param change Index of how far you are going to change to the topLeft
@@ -339,7 +340,7 @@ public class CheckersBoard implements CheckersGame
 		//either moves the piece (if its valid) or sends an exception
 		
 		if(correctOwner(from) == false)	//makes sure that its the correct owner, otherwise throws an exception
-			throw new CheckersIllegalMoveException("Illegal Move, you do not have a piece at spot " + coordinates.get(from));
+		    throw new CheckersIllegalMoveException("Illegal Move, you do not have a piece at spot " + coordinates.get(from));
 		
 		validSpots(from);	//sets all the corners to their proper numbers so we can check it against the parameter 'to'
 		
@@ -436,7 +437,7 @@ public class CheckersBoard implements CheckersGame
 					pieces.set(to, 'O');
 				}
 			}
-				
+
 			//SWITCH TURNS
 			char temp = opponent;	
 			opponent = turn;
@@ -448,8 +449,10 @@ public class CheckersBoard implements CheckersGame
 		
 		if(xCount == 0){
 			System.out.println("O WINS!");
+			winner = 'o';
 		}else if(oCount == 0){
 			System.out.println("X WINS!");
+			winner = 'x';
 		}
 	}//end move
 	
@@ -487,7 +490,7 @@ public class CheckersBoard implements CheckersGame
 			}else if(i == 28){
 				result += "8|";
 			}
-					
+
 			if(i < 4){
 				result += "|   | " + pieces.get(i) + " ";
 			}else if(i < 8){
@@ -505,14 +508,44 @@ public class CheckersBoard implements CheckersGame
 			}else if(i < 32){
 				result += " " + pieces.get(i) + " |   |";
 			}
-				
+
 			if(i == 3 || i == 11 || i == 19 || i == 27){
 				result += "|";
 			}
 		}//end for
 		result += "\n-+---+---+---+---+---+---+---+---+\n";
 		return result;
+
+
 	}//end toString()
+
+	public String cleanCoord(String s){
+	    String r = s, Spre, Ssuf;
+	    char Cpre, Csuf;
+
+	     // S isn't 2 chars, invalid, return entry
+	    if (r.length() != 2) return s;
+
+	    
+	    Cpre = r.charAt(0);
+	    Csuf = r.charAt(1);
+	    
+	    // First make sure that format is <Letter><Digit>
+	    if (Character.isDigit(Cpre) && Character.isLetter(Csuf)) { // Format is <Digit><Letter>, switch it
+		char temp = Csuf;
+		Csuf = Cpre;
+		Cpre = temp;
+	    }
+
+	    Spre = String.valueOf(Cpre);
+	    Ssuf = String.valueOf(Csuf);
+
+	    Spre = Spre.toUpperCase();
+	    
+	    r = Spre + Ssuf;
+
+	    return r;
+	}
 }//end class Checkers
 
 /**

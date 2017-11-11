@@ -22,9 +22,9 @@ public class TextCheckers
 	   System.out.println(c); // c.toString() implicitly invoked
 	   System.out.println("" + c.getTurn() + "'s turn: ");
 	   do{
-	   	String line1  = sc.nextLine();
+	   	String line1  = sc.next();
 	   	num1 = c.findCoordinates(line1);
-	   	String line2 = sc.nextLine();
+	   	String line2 = sc.next();
 	   	num2 = c.findCoordinates(line2);
 	   	if(num1 == -1 || num2 == -1){
 	   		System.out.println("Invalid Coordinates, please input different coordinates:  ");
