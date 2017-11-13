@@ -28,19 +28,6 @@ public class TextCheckers
 	   	}
 	   }while(num1x == -1 || num1y == -1 || num2x == -1 || num2y == -1);
 
-	   //debugging crap
-	   System.out.println(num1x + " " + num1y);
-	   System.out.println(num2x + " " + num2y);
-	   if (c.correctOwner(num1x, num1y)) {
-	       System.out.println("True");
-	   }
-	   else {
-	       System.out.println("False");
-	   }
-	   System.out.println(c.getPiece(num1x, num1y));   
-	   System.out.println(c.getPiece(num2x, num2y));
-	   System.out.println(c.getError());
-
 	   
 	   c.checkWinner();
 	   c.move(num1x, num1y, num2x, num2y);

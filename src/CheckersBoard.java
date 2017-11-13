@@ -172,7 +172,7 @@ public class CheckersBoard implements CheckersGame
 	    System.out.println("Thats not your piece");
 	    error = true;
 	    }
-	else if (x1 > 7 || x2 > 7 || x3 > 7 || x4 > 7 || y1 > 7 || y2 > 7 || y3 > 7 || y4 > 7) { //check if out of bounds
+	else if (toI > 7 || toJ > 7) { //check if out of bounds
 	    // throw new CheckersIllegalMoveException("You cant move off the board");
 	    System.out.println("You cant move off the board");
 	    error = true;
@@ -297,7 +297,6 @@ public class CheckersBoard implements CheckersGame
     
     public void move(int fromI, int fromJ, int toI, int toJ) {
 	setMoves(fromI, fromJ, toI, toJ);
-	System.out.println(x1 + " " + y1 + " " + x2 + " " + y2 + " " + x3 + " " +  y3 + " " + x4 + " " + y4);
 	validMove(fromI, fromJ, toI, toJ);
 	if (canJump == true && validMove == true) {
 	    pieces[fromI][fromJ] = ' ';
