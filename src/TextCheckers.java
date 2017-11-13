@@ -1,12 +1,6 @@
 package edu.ucsb.cs56.projects.games.checkers;
 import java.util.Scanner;
 
-/**
- * A Text UI for playing Checkers
- * @author Ryan Kroner
- * @version for CS56, W12, UCSB, 02/23/2012
- * @see CheckersTest
- */
 public class TextCheckers
 {
     public static void main(String [] args) {
@@ -45,12 +39,15 @@ public class TextCheckers
 	   }
 	   System.out.println(c.getPiece(num1x, num1y));   
 	   System.out.println(c.getPiece(num2x, num2y));
-	   
+	   System.out.println(c.getError());
 
 	   
 	   c.checkWinner();
 	   c.move(num1x, num1y, num2x, num2y);
-	   c.changeTurn();
+	   if (c.getError() == false) {
+	       c.changeTurn();
+	   }
+	   c.setError();
 	   winner = c.getWinner();
 	   done = (winner!=' ');
 	}//end while

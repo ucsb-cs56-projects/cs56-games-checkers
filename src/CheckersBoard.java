@@ -17,10 +17,21 @@ public class CheckersBoard implements CheckersGame
     private int y2;
     private int y3;
     private int y4;
+
+    //possible places that would be jumped to
+    private int jumpULI;
+    private int jumpULJ;
+    private int jumpURI;
+    private int jumpURJ;
+    private int jumpDLI;
+    private int jumpDLJ;
+    private int jumpDRI;
+    private int jumpDRJ;
     
-    private int jumpI; //possible places that would be jumped to
-    private int jumpJ;
-    
+    public boolean error = false;
+
+    private int jumpedI;
+    private int jumpedJ;
     private boolean jumped; //true if jumped
 
     private int xCount = 12; //count of x pieces
@@ -56,6 +67,7 @@ public class CheckersBoard implements CheckersGame
 		}
 	}
     }
+    public void setError() { error = false; }
 	
     public char getTurn() { return turn; }
 
@@ -63,6 +75,8 @@ public class CheckersBoard implements CheckersGame
 
     public char getWinner() { return winner; }
 
+    public Boolean getError() { return error; }
+    
     public void changeTurn() {
 	if (turn == 'x') {
 	    turn = 'o';
@@ -113,11 +127,20 @@ public class CheckersBoard implements CheckersGame
             y1 = fromJ - 1;
             x2 = fromI - 1; // up right                                                                 
             y2 = fromJ + 1;
+	    jumpULI = fromI - 2; //jump up left
+	    jumpULJ = fromJ - 2;
+	    jumpURI = fromI - 2; // jump up right
+	    jumpURJ = fromJ + 2;
+	    
             if (pieces[fromI][fromJ] == 'X') { // if its a king
 		x3 = fromI + 1; // back left                                                            
                 y3 = fromJ - 1;
                 x4 = fromI + 1; // back right                                                           
                 y4 = fromJ + 1;
+		jumpDLI = fromI + 2; //jump back left
+		jumpDLJ = fromJ - 2;
+		jumpDRI = fromI + 2; // jump back right
+		jumpDRJ = fromJ + 2;
             }
         }
         else if (turn == 'o') {
@@ -125,90 +148,123 @@ public class CheckersBoard implements CheckersGame
             y1 = fromJ - 1;
             x2 = fromI + 1; // up left                                                                  
             y2 = fromJ + 1;
+	    jumpULI = fromI + 2; //jump up left                                                         
+            jumpULJ = fromJ - 2;
+            jumpURI = fromI + 2; // jump up right                                                       
+            jumpURJ = fromJ + 2;
             if (pieces[fromI][fromJ] == 'O') { // if its a king                                         
                 x3 = fromI - 1; // back right                                                           
                 y3 = fromJ - 1;
                 x4 = fromI - 1; // back left                                                            
                 y4 = fromJ + 1;
+		jumpDLI	= fromI	- 2; //jump back left                                                   
+                jumpDLJ	= fromJ	- 2;
+                jumpDRI	= fromI - 2; //jump back right
+		jumpDRJ	= fromJ	+ 2;
+
             }
         }
     }
 
-    public void validMove(int fromI, int fromJ, int toI, int toJ) throws CheckersIllegalMoveException {
+    public void validMove(int fromI, int fromJ, int toI, int toJ) {
       	if (!correctOwner(fromI, fromJ)) {
-	    throw new CheckersIllegalMoveException("Thats not your piece");
+	    //	    throw new CheckersIllegalMoveException("Thats not your piece");
+	    System.out.println("Thats not your piece");
+	    error = true;
 	    }
 	else if (x1 > 7 || x2 > 7 || x3 > 7 || x4 > 7 || y1 > 7 || y2 > 7 || y3 > 7 || y4 > 7) { //check if out of bounds
-	    throw new CheckersIllegalMoveException("You cant move off the board");
+	    // throw new CheckersIllegalMoveException("You cant move off the board");
+	    System.out.println("You cant move off the board");
+	    error = true;
 	}
-	else if (toI == x1 && toJ == y1) {
-	    validMove = true;
+	else if (toI == x1 && toJ == y1) { // tired to combine all this into one if statement with ||
+	    squareOpen(toI, toJ);          // but wasnt working and worked when separated 
 	}
 	else if (toI == x2 && toJ == y2) {
-	    validMove = true;
+	    squareOpen(toI, toJ);
 	}
 	else if (toI == x3 && toJ == y3) {
-	    validMove = true;
+	    squareOpen(toI, toJ);
 	}
 	else if (toI == x4 && toJ == y4) {
-	    validMove = true;
+	    squareOpen(toI, toJ);
 	}
-	else if ((turn == 'o' && pieces[toI][toJ] == 'x') || (turn == 'x' && pieces[toI][toJ] == 'o')) {
+	else if (toI == jumpULI && toJ == jumpULJ) { //see comment above
+	    checkJump(fromI, fromJ, toI, toJ);
+	}
+	else if (toI == jumpURI && toJ == jumpURJ) {
+	    checkJump(fromI, fromJ, toI, toJ);
+	}
+	else if (toI == jumpDLI && toJ == jumpDLJ) {
+	    checkJump(fromI, fromJ, toI, toJ);
+	}
+	else if (toI == jumpDRI && toJ == jumpDRJ) {
 	    checkJump(fromI, fromJ, toI, toJ);
 	}
 	else {
 	    validMove = false;
 	}
-	// maybe all these ifs^^ can be replaced by if != ' '?
     }
-    
-    public void checkJump(int fromI, int fromJ, int toI, int toJ) {
-	if (turn == 'x') {
-	    if(toI == x1 && toJ == y1) {
-		jumpI = x1 - 1;
-		jumpJ = y1 - 1;
-	    }
-	    else if (toI == x2 && toJ == y2) {
-		jumpI = x2 - 1;
-		jumpJ = y2 + 1;
-	    }
-	    else if (toI == x3 && toJ == y3 && pieces[fromI][fromJ] == 'X') {
-		jumpI = x3 + 1;
-		jumpJ = y3 - 1;
-	    }
-	    else if (toI == x4 && toJ == y4 && pieces[fromI][fromJ] == 'X') {
-		jumpI = x4 + 1;
-		jumpJ = y4 + 1;
-	    }
-	    else {
-		validMove = false;
-	    }
-	}
-	if (turn == 'o') {
-	    if(toI == x1 && toJ == y1) {
-		jumpI = x1 + 1;
-		jumpJ = y1 + 1;
-	    }
-	    else if (toI == x2 && toJ == y2) {
-		jumpI = x2 + 1;
-		jumpJ = y2 + 1;
-	    }
-	    else if (toI == x3 && toJ == y3 && pieces[fromI][fromJ] == 'O') {
-		jumpI = x3 - 1;
-		jumpJ = y3 - 1;
-	    }
-	    else if (toI == x4 && toJ == y4 && pieces[fromI][fromJ] == 'O') {
-		jumpI = x4 - 1;
-		jumpJ = x4 + 1;
-	    }
-	    else {
-		validMove = false;
-	    }
-	}
-	if (pieces[jumpI][jumpJ] == ' ') {
-	    canJump = true;
+
+    public void squareOpen(int i, int j) {
+        if (pieces[i][j] == ' ') {
 	    validMove = true;
 	}
+	else {
+	    validMove = false;
+	}
+    }
+    
+    public void jumped(int i, int j) {
+	if (turn == 'x') {
+	    if (pieces[i][j] == 'o') {
+		validMove = true;
+	    }
+	}
+	else if (turn == 'o') {
+	    if (pieces[i][j] == 'x') {
+		validMove = true;
+	    }
+	}
+    }
+    public void checkJump(int fromI, int fromJ, int toI, int toJ) {
+	if (toI == jumpULI && toJ == jumpULJ) {
+	    jumped(x1,y1);
+	    if (validMove = true) {
+		canJump = true;
+		jumpedI = x1;
+		jumpedJ = y1;
+	    }
+	}
+	else if (toI == jumpURI && toJ == jumpURJ) {
+	    jumped(x2, y2);
+	    if (validMove = true) {
+                canJump	= true;
+		jumpedI = x2;
+		jumpedJ = y2;
+	    }
+	}
+	else if (toI == jumpDLI && toJ == jumpDLJ) {
+	    jumped(x3, y3);
+	    if (validMove = true) {
+                canJump	= true;
+		jumpedI = x3;
+		jumpedJ = y3;
+	    }
+	}
+	else if (toI == jumpDRI && toJ == jumpDRJ) {
+	    jumped(x4, y4);
+	    if (validMove = true) {
+                canJump	= true;
+		jumpedI = x4;
+		jumpedJ = y4;
+	    }
+	}
+	else {
+	    validMove = false;
+	    canJump = false;
+	}
+
     }
     
     public Boolean kingCheck(int i, int j){
@@ -239,25 +295,27 @@ public class CheckersBoard implements CheckersGame
 	}
     }
     
-    public void move(int fromI, int fromJ, int toI, int toJ) throws CheckersIllegalMoveException {
+    public void move(int fromI, int fromJ, int toI, int toJ) {
 	setMoves(fromI, fromJ, toI, toJ);
-	System.out.println(x1 + " " + y1 + " " + x2 + " " + y2);
+	System.out.println(x1 + " " + y1 + " " + x2 + " " + y2 + " " + x3 + " " +  y3 + " " + x4 + " " + y4);
 	validMove(fromI, fromJ, toI, toJ);
 	if (canJump == true && validMove == true) {
 	    pieces[fromI][fromJ] = ' ';
-	    pieces[toI][toJ] = ' ';
-	    if (kingCheck(jumpI, jumpJ)) {
+	    if (kingCheck(toI, toJ)) {
 		if (turn == 'x') {
-		    pieces[jumpI][jumpJ] = 'X';
+		    pieces[toI][toJ] = 'X';
+		    pieces[jumpedI][jumpedJ] = ' ';
 		    --oCount;
 		}
 		else {
-		    pieces[jumpI][jumpJ] = 'O';
+		    pieces[toI][toJ] = 'O';
+		    pieces[jumpedI][jumpedJ] = ' ';
 		    --xCount;
 		}
 	    }
 	    else {
-		pieces[jumpI][jumpJ] = turn;
+		pieces[toI][toJ] = turn;
+		pieces[jumpedI][jumpedJ] = ' ';
 	    }
 	}
 	if (canJump == false && validMove == true) {
@@ -265,9 +323,11 @@ public class CheckersBoard implements CheckersGame
 	    pieces[toI][toJ] = turn;
 	}
 	if (validMove == false) {
-	    throw new CheckersIllegalMoveException("Please make a valid move");
+	    // throw new CheckersIllegalMoveException("Please make a valid move");
+	    error = true;
 	}
-	
+	validMove = false;
+	canJump = false;
     }
     
 
@@ -276,7 +336,7 @@ public class CheckersBoard implements CheckersGame
      */
     public String toString() {
 	String result;
-	result = "| A | B | C | D | E | F | G | H |";
+	result = " | A | B | C | D | E | F | G | H |";
 
 	for (int i = 0; i < 8; i++) {
 	    result += "\n-+---+---+---+---+---+---+---+---+\n";
@@ -285,6 +345,7 @@ public class CheckersBoard implements CheckersGame
 		result += " " +  pieces[i][j] + " |";
 	    }
 	}
+	result += "\n-+---+---+---+---+---+---+---+---+\n";
 	return result;
     }
 
@@ -309,7 +370,7 @@ public class CheckersBoard implements CheckersGame
             Cpre = temp;
 	}
         Spre = String.valueOf(Cpre);
-        Ssuf = String.valueOf(Csuf);
+        Ssuf = String.valueOf(Csuf);y
 	Spre = Spre.toUpperCase();
         r = Spre + Ssuf;
         return r;
