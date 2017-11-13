@@ -353,7 +353,7 @@ public class CheckersBoard implements CheckersGame
      * @param input from user, either piece theyre selecting or spot they want to move to
      * @return input in proper format
      */
-    /*   public String cleanCoord(String s) {
+    public String cleanCoord(String s) {
 	String r = s, Spre, Ssuf;
 	char Cpre, Csuf;
 	// S isn't 2 chars, invalid, return entry
@@ -362,18 +362,18 @@ public class CheckersBoard implements CheckersGame
         Csuf = r.charAt(1);
 
             // First make sure that format is <Letter><Digit>
-        if (Character.isDigit(Cpre) && Character.isLetter(Csuf)) { //	\
-	    Format is <Digit><Letter>, switch(it)                                       
+        if (Character.isDigit(Cpre) && Character.isLetter(Csuf)) { // Format is <Digit><Letter>, switch it     
             char temp = Csuf;
             Csuf = Cpre;
             Cpre = temp;
 	}
         Spre = String.valueOf(Cpre);
-        Ssuf = String.valueOf(Csuf);y
+        Ssuf = String.valueOf(Csuf);
 	Spre = Spre.toUpperCase();
         r = Spre + Ssuf;
         return r;
-	}*/
+    }
+	
     public int findYCoordinate(String s) {
 	char coord = s.charAt(0);
 	int x;

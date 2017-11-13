@@ -17,9 +17,11 @@ public class TextCheckers
 	   System.out.println("" + c.getTurn() + "'s turn: ");
 	   do{
 	   	String line1  = sc.next();
+		line1 = c.cleanCoord(line1);
 	   	num1x = c.findXCoordinate(line1);
 		num1y = c.findYCoordinate(line1);
 	   	String line2 = sc.next();
+		line2 = c.cleanCoord(line2);
 	   	num2x = c.findXCoordinate(line2);
 		num2y = c.findYCoordinate(line2);
 		
