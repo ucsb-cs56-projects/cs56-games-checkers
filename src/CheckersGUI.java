@@ -24,17 +24,17 @@ public class CheckersGUI {
        frame. setDefaultCloseOperation(JFrame. EXIT_ON_CLOSE) ;
        
        // A JTextArea (see p. 414-415 of textbook)
-       JTextAreaMessageDestination text = new JTextAreaMessageDestination(10,30);
-       JScrollPane scroller = new JScrollPane(text);
-       scroller.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-       scroller.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-       frame.getContentPane().add(BorderLayout.SOUTH,scroller);
+       JTextAreaMessageDestination message = new JTextAreaMessageDestination(10,30);
+       JScrollPane messageScroller = new JScrollPane(message);
+       messageScroller.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+       messageScroller.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+       frame.getContentPane().add(BorderLayout.SOUTH,messageScroller);
        
        // since TicTacToeGrid implements the TicTacToeGame interface,
        // we can use TicTacToeGame on left hand side.
 
        CheckersGame game = new CheckersBoard();
-       CheckersComponent cc = new CheckersComponent(game,text);
+       CheckersComponent cc = new CheckersComponent(game, message);
        frame.getContentPane().add(cc);
 
        // to make sure that grids go left to right, no matter what

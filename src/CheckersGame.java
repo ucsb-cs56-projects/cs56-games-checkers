@@ -3,52 +3,74 @@ package edu.ucsb.cs56.projects.games.checkers;
 /**
  * An interface for Checkers games
  * 
- * @author Ryan Kroner
- * @version for CS56, W12, UCSB, 02/23/2012
+ * @author Matthew Maatubang ang Graham Foster
+ * @version for CS56, F17
  * @see CheckersBoard
  * 
 */
-public interface CheckersGame 
-{
-	/** Checks the turn
-	 * @return Either 'X' or 'O' - whoevers turn is it
-	 */
-	public char getTurn();
-       	
-	/** Tells you if you have a piece on the spot you want to move
-	 * 
-	 * @param i The index in the arraylist where the spot is
-	 * @return True if the piece is on the spot you want to move
-	 */	
-        public boolean correctOwner(int i, int j);
-		
-	/** Will allow the user to move, assuming that valid spot is true.  If it is false, will throw a CheckersIllegalMoveException
-	 * 
-	 * @param from The spot in the arraylist where the piece is current on (where you want to move from)
-	 * @param to The spot in the arraylist where the piece is moving to	 
-	 */
-        public void move(int fromI, int fromJ, int toI, int toJ) throws CheckersIllegalMoveException;
 
-        public void validMove(int fromI, int fromJ, int toI, int toJ) throws CheckersIllegalMoveException;
-        public void setMoves(int fromI, int fromJ, int toI, int toJ);    
+public interface CheckersGame {
 
-        public void checkJump(int fromI, int fromJ, int toI, int toJ);
+	// BOARD FUNCTIONS
 
-        public Boolean kingCheck(int i, int j);
+	/** A toString method for the CheckersBoard
+	* Allows easier access for console based interface
+	* @return A String containing the gameBoard
+	*/
+	public String toString(); 
+
+	/**  Returns who will make the next move
+	* @return 'x' or 'o' depending on the move
+	*/
+	public char getTurn(); 
+
+	/**  Changes the current turn of the internal CheckersBoard
+	* @return Internally switch between 'x' and 'o' depending on the previous move
+	*/
+	public void changeTurn(); 
+	
+	/**  Returns the winner of the game
+	* @return 'x' or 'o' depending on the loser having 0 pieces
+	*/
+	public char getWinner(); 
+
+	/**  Checks the # of x's and o's remaining on board
+	* Sets winner if a player has 0 pieces left
+	* @return Internally set 'x' or 'o' depending on the move
+	*/
+	public void checkWinner(); 
+
+	/**  Returns number of 'x' pieces
+	* @return # of x's remaining on board
+	*/
+	public int getXCount(); 
+
+	/**  Returns number of 'o' pieces
+	* @return # of o's remaining
+	*/
+	public int getOCount(); 
+
+        /** Return char at the coordinates
+	* @return Value of the piece at i, j
+	*/
+        public char getPiece(int i , int j);
     
-        public void changeTurn();
-    
-	public char getWinner();
+	// MOVEMENT FUNCTIONS 
 
-        public int getXCount();
+	/**  Moves a piece from the from coordinates to the to coordinates, if possible
+	* @return Internally execute move if possible, do nothing otherwise
+	*/
+	public void move(int fromI, int fromJ, int toI, int toJ); 
+	
+	/**  Returns whether an entered move was actually executed
+	* @return true if the move was made, false otherwise
+	*/
+	public boolean moveWasMade(); 
 
-        public int getOCount();
+	/** A formatting function that allows multiple different types of inputs
+	 * @param input from user, either piece theyre selecting or spot they want to move to
+	 * @return int array holding { x coordinate, y coordinate }
+	 */
+	public int[] parseInput(String s); 
 
-        public String toString();
-
-        public void checkWinner();
-
-        public int findXCoordinate(String s);
-
-        public int findYCoordinate(String s);
 }
