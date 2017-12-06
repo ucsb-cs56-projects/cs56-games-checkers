@@ -1,594 +1,284 @@
 package edu.ucsb.cs56.projects.games.checkers;
-import java.util.ArrayList;
+
+/** A series of JUnit tests to test checkerboard and moves
+   @author Ryan Kroner
+   @author Graham Foster
+   @author Matthew Maatubang
+   @version UCSB CS56, F17
+ */
+
+public class CheckersBoard implements CheckersGame {
+
+	// BOARD VARS
+	private char[][] pieces         = new char[8][8]; // 2D array of pieces
+	private char turn               = 'x';            // x alwayds starts
+	private char winner             = ' ';            // changed to either x,o, or t at end of game
+	private int xCount              = 12;             // count of x pieces
+	private int oCount              = 12;             // count of o pieces
 
 
-//Basic classes for Checkers, Non-GUI. Plus a J-Unit Test similar to Lab 07 from S11: https://foo.cs.ucsb.edu/56wiki/index.php/S11:Labs:lab07
+	// MOVEMENT DIRECTION VARS
+	private int forward;
+	private int backward;
+	private int left;
+	private int right;
+	private int jumpForward;
+	private int jumpBackward;
+	private int jumpLeft;
+	private int jumpRight;
+	private int forwardOffset;
+	private int kingOffset;
+	private int jumpedI;
+	private int jumpedJ;
+	private static int X_MOVEMENT	= -1;
+	private static int O_MOVEMENT	= 1;
+	private static int LEFT_OFFSET  = -1;
+	private static int RIGHT_OFFSET = 1;
+	private static int JUMP_FACTOR  = 2;
+	private boolean canJump         = false;          // true if can jump, false if not
+	private boolean validMove       = false;
 
-/**
- * A Checkers Board
- 
- 
- 
- * @author Ryan Kroner
- * @version for CS56, W12, UCSB, 02/23/2012
- * 
-*/
 
-public class CheckersBoard implements CheckersGame
-{
-	//instance variables
-	private ArrayList<Character> 	pieces = new ArrayList<Character>();	//array of pieces
-	private ArrayList<String>	coordinates = new ArrayList<String>();	//array of coordinates
-	private char 			turn = 'x';				//turn starts off as x
-	private char 			opponent = 'o';				//always opposite of turn, starts as o
-	private int 			topLeft;				//for top left
-	private int 			topRight;				//for top right			tL		tR
-	private int 			bottomLeft;				//for bottom left			S
-	private int 			bottomRight;				//for bottom right		bL		bR
-	private int 			jumpSpotTL;				//index in array of jumped spot top left
-	private int 			jumpSpotTR;				//index in array of jumped spot top right
-	private int 			jumpSpotBL;				//index in array of jumped spot bottom left
-	private int 			jumpSpotBR;				//index in array of jumped spot bottom right
-	private boolean			jumped;					//true if jumped, false if didnt jump
-	private int			oCount = 12;				//count of o pieces
-	private int			xCount = 12;				//count of x pieces
-	private char			winner = ' ';				//will be ' ' until either 'x' or 'o' wins
-	private boolean 		canJump = false;			//false if you cant jump, true if you can
-	
+
+	// BOARD FUNCTIONS
+
 	/**
-	 *  Constructor for objects of class CheckerBoard which initializes the entire game board and the coordinates associated with it
-	 */
-	public CheckersBoard(){
-		//initialize the checkers board
-		for(int i = 0; i < 32; i++){
-			if(i < 12){
-				pieces.add(i, 'o');
-			}else if(i > 19){
-				pieces.add(i, 'x');
-			}else{
-				pieces.add(i,' ');
-			}
-		}//end for
-		
-		//Lines up the coordinates with the pieces
-		coordinates.add(0,"B1");
-		coordinates.add(1,"D1");
-		coordinates.add(2,"F1");
-		coordinates.add(3,"H1");
-		coordinates.add(4,"A2");
-		coordinates.add(5,"C2");
-		coordinates.add(6,"E2");
-		coordinates.add(7,"G2");
-		coordinates.add(8,"B3");
-		coordinates.add(9,"D3");
-		coordinates.add(10,"F3");
-		coordinates.add(11,"H3");
-		coordinates.add(12,"A4");
-		coordinates.add(13,"C4");
-		coordinates.add(14,"E4");
-		coordinates.add(15,"G4");
-		coordinates.add(16,"B5");
-		coordinates.add(17,"D5");
-		coordinates.add(18,"F5");
-		coordinates.add(19,"H5");
-		coordinates.add(20,"A6");
-		coordinates.add(21,"C6");
-		coordinates.add(22,"E6");
-		coordinates.add(23,"G6");
-		coordinates.add(24,"B7");
-		coordinates.add(25,"D7");
-		coordinates.add(26,"F7");
-		coordinates.add(27,"H7");
-		coordinates.add(28,"A8");
-		coordinates.add(29,"C8");
-		coordinates.add(30,"E8");
-		coordinates.add(31,"G8");
-	}
-	
-	public char getTurn(){ return turn; }
-	
-	public char getPiece(int i){ return pieces.get(i); }
-	
-	public char getWinner(){ return winner; }
-	
-	/** Used by the TextCheckers.java class for the inputted coordinates of the user
-	 * @see TextCheckers
-	 * @param s A String value that we compare to the coordinates array
-	 * @return The index of the array so you can access that spot in the pieces array
-	 */
-	public int findCoordinates(String s){
-		String input = cleanCoord(s);
-		for(int i = 0; i < 32; i++){
-			if(input.equals(coordinates.get(i))){
-				return i;
+	*
+	*/
+	public CheckersBoard() {
+		for (int j = 0; j < 8; j++) {
+			if (j % 2 == 0) {
+				pieces[0][j] = ' ';
+				pieces[1][j] = 'o';
+				pieces[2][j] = ' ';
+				pieces[3][j] = ' ';
+				pieces[4][j] = ' ';
+				pieces[5][j] = 'x';
+				pieces[6][j] = ' ';
+				pieces[7][j] = 'x';
+			} else {
+				pieces[0][j] = 'o';
+				pieces[1][j] = ' ';
+				pieces[2][j] = 'o';
+				pieces[3][j] = ' ';
+				pieces[4][j] = ' ';
+				pieces[5][j] = ' ';
+				pieces[6][j] = 'x';
+				pieces[7][j] = ' ';
 			}
 		}
-		return -1;
-	}
-	
-	/**Checks if the index you are moving from is owned by the correct owner
-	 * @param i The index of the spot you are trying to move
-	 * @return True if you own the spot, or False if you do not own it
-	 */
-	public boolean correctOwner(int i){
-		if(turn == 'x'){	//if its x's turn, makes sure the spot is owned by 'x'
-		    if(pieces.get(i) == 'x' || pieces.get(i) == 'X'){
-			return true;
-		    }else{
-			return false;
-		    }
-		}
-		if(turn == 'o'){	//if its o's turn, makes sure the spot is owned by 'o'
-		    if(pieces.get(i) == 'o' || pieces.get(i) == 'O'){
-			return true;
-		    }else{
-			return false;
-		    }
-		}
-		return false;
 	}
 
-	/**Sets the topLeft variable to where you are able to move to (or -1 if you cant move to the top left)
-	 * @param from The spot where the current piece is
-	 * @param change Index of how far you are going to change to the topLeft
-	 */
-	public void setTopLeft(int from, int change){
-		if(from+change > 31 || from+change < 0){//makes sure its in range
-			jumpSpotTL = -1;
-			topLeft = -1;
-			return;
-		}
-		
-		int x = from+change;
-		while(x > 7){
-			x -= 8; // if its a corner it will either turn into a 4 or a 3
-		}
-		
-		if(change == 0){	//if you cant jump
-			topLeft = -1;
-		}else if(pieces.get(from+change) == ' ' && canJump == false){	//if its unoccupied and you cant jump any pieces
-			topLeft = from+change;
-			jumpSpotTL = -1;
-		}else if(pieces.get(from+change) == opponent){	//if another persons piece occupies it, tests to see if you can jump
-			if((x == 4) && (x == 3)){	//if you cant jump
-				topLeft = -1;
-			}else{
-				if(change == -4){
-					if(pieces.get(from+change-5) == ' '){ topLeft = from+change-5; jumpSpotTL=from+change; } else { topLeft = -1; }
-				}else if(change == -5){
-					if(pieces.get(from+change-4) == ' '){ topLeft = from+change-4; jumpSpotTL=from+change; } else { topLeft = -1; }
-				}
-			}
-		}else if(pieces.get(from+change) == turn){	//if that spot is owned by your piece
-			topLeft = -1;
-		}
-		
-		if(topLeft < 0 || topLeft > 27){	//makes sure topLeft has a valid space
-			topLeft = -1;
-			jumpSpotTL = -1;
-		}
-	}//end setTopLeft
-	
-	/**Sets the topRight variable to where you are able to move to (or -1 if you cant move to the top right)
-	 * @param from The spot where the current piece is
-	 * @param change Index of how far you are going to change to the topRight
-	 */
-	public void setTopRight(int from, int change){
-		if(from+change > 31 || from+change < 0){//makes sure its in range
-			jumpSpotTR = -1;
-			topRight = -1;
-			return;
-		}
-		
-		int x = from+change;
-		while(x > 7){
-			x -= 8; // if its a corner it will either turn into a 4 or a 3
-		}
-		
-		if(change == 0){	//if you cant jump
-			topRight = -1;
-		}else if(pieces.get(from+change) == ' ' && canJump == false){	//if its unoccupied and you cant jump any pieces
-			topRight = from+change;
-			jumpSpotTR = -1;
-		}else if(pieces.get(from+change) == opponent){	//if another persons piece occupies it, tests to see if you can jump
-			if((x == 4) && (x == 3)){	//if you cant jump
-				topRight = -1;
-			}else{
-				if(change == -4){
-					if(pieces.get(from+change-3) == ' '){ topRight = from+change-3; jumpSpotTR=from+change; } else { topRight = -1; }
-				}else if(change == -3){
-					if(pieces.get(from+change-4) == ' '){ topRight = from+change-4; jumpSpotTR=from+change; } else { topRight = -1; }
-				}
-			}
-		}else if(pieces.get(from+change) == turn){	//if that spot is owned by your piece
-			topRight = -1;
-		}
-		
-		if(topRight < 0 || topRight > 27){	//makes sure topRight has a valid space
-			topRight = -1;
-			jumpSpotTR = -1;
-		}
-	}//end setTopRight
-	
-	/**Sets the bottomLeft variable to where you are able to move to (or -1 if you cant move to the bottom left)
-	 * @param from The spot where the current piece is
-	 * @param change Index of how far you are going to change to the bottomLeft
-	 */
-	public void setBottomLeft(int from, int change){
-		if(from+change > 31 || from+change < 0){//makes sure its in range
-			jumpSpotBL = -1;
-			bottomLeft = -1;
-			return;
-		}
-		
-		int x = from+change;
-		while(x < 24){
-			x += 8; // if its a corner it will either turn into a 4 or a 3
-		}
-		
-		if(change == 0){	//if you cant jump
-			bottomLeft = -1;
-		}else if(pieces.get(from+change) == ' ' && canJump == false){	//if its unoccupied and you cant jump any pieces
-			jumpSpotBL = -1;
-			bottomLeft = from+change;
-		}else if(pieces.get(from+change) == opponent){	//if another persons piece occupies it, tests to see if you can jump
-			if((x == 27) && (x == 28)){	//if you cant jump
-				bottomLeft = -1;
-			}else{
-				if(change == 4){
-					if(pieces.get(from+change+3) == ' '){ bottomLeft = from+change+3; jumpSpotBL=from+change; } else { bottomLeft = -1; }
-				}else if(change == 3){
-					if(pieces.get(from+change+4) == ' '){ bottomLeft = from+change+4; jumpSpotBL=from+change; } else { bottomLeft = -1; }
-				}
-			}
-		}else if(pieces.get(from+change) == turn){	//if that spot is owned by your piece
-			bottomLeft = -1;
-		}
-		
-		if(bottomLeft < 4 || bottomLeft > 31){	//makes sure bottomLeft has a valid space
-			jumpSpotBL = -1;
-			bottomLeft = -1;
-		}
-	}//end setBottomLeft
-	
-	/**Sets the bottomRight variable to where you are able to move to (or -1 if you cant move to the bottom right)
-	 * @param from The spot where the current piece is
-	 * @param change Index of how far you are going to change to the bottomRight
-	 */
-	public void setBottomRight(int from, int change){	//from is the spot where the current piece is, change is the change to bottomRight
-		if(from+change > 31 || from+change < 0){//makes sure its in range
-			jumpSpotBR = -1;
-			bottomRight = -1;
-			return;
-		}
-		
-		int x = from+change;
-		while(x > 24){
-			x -= 8; // if its a corner it will either turn into a 4 or a 3
-		}
-		
-		if(change == 0){	//if you cant jump
-			bottomRight = -1;
-		}else if(pieces.get(from+change) == ' ' && canJump == false){	//if its unoccupied and you cant jump any pieces
-			jumpSpotBR = -1;
-			bottomRight = from+change;
-		}else if(pieces.get(from+change) == opponent){	//if another persons piece occupies it, tests to see if you can jump
-			if((x == 27) && (x == 28)){	//if you cant jump
-				bottomRight = -1;
-			}else{
-				if(change == 4){
-					if(pieces.get(from+change+5) == ' '){ bottomRight = from+change+5; jumpSpotBR=from+change; } else { bottomRight = -1; }
-				}else if(change == 5){
-					if(pieces.get(from+change+4) == ' '){ bottomRight = from+change+4; jumpSpotBR=from+change; } else { bottomRight = -1; }
-				}
-			}
-		}else if(pieces.get(from+change) == turn){	//if that spot is owned by your piece
-			bottomRight = -1;
-		}
-		
-		if(bottomRight < 4 || bottomRight > 31){	//makes sure bottomRight has a valid space
-			jumpSpotBR = -1;
-			bottomRight = -1;
-		}
-		
-	}//end setBottomRight
-	
-	/** Checks all of the valid spots that are around the piece you select.
-	 * -Sets value setTopLeft to the value of the top left corner you are able to move to (or 0 if invalid);
-	 * -Sets value setTopRight to the value of the top right corner you are able to move to (or 0 if invalid);
-	 * -Sets value setBottomLeft to the value of the bottom left corner you are able to move to (or 0 if invalid);
-	 * -Sets value setBottomRight to the value of the bottom right corner you are able to move to (or 0 if invalid);
-	 * @param from The spot you are moving from
-	 */
-	public void validSpots(int from){	//sets the corners to the correct spots
-		if(from == 4 || from == 12 || from == 20 || from == 28){	//left side of the board
-			setTopLeft(from, 0);		//cant go farther left
-			setBottomLeft(from, 0);
-			setTopRight(from, -4);
-			setBottomRight(from, 4);
-		}else if(from == 3 || from == 11 || from == 19 || from == 27){	//right side of the board
-			setTopRight(from, 0);		//cant go farther right
-			setBottomRight(from, 0);
-			setTopLeft(from, -4);
-			setBottomLeft(from, 4);
-		}else{	//otherwise its the middle 
-			int x = from;
-			while(x >= 8){
-				x -= 8; // will turn x into either a 0,1,2 (odd row) or a 5,6,7 (even row)
-			}
-			if(x < 3){	//odd row
-				setTopLeft(from, -4);
-				setTopRight(from, -3);
-				setBottomLeft(from, 4);
-				setBottomRight(from, 5);
-			}else{		//even row
-				setTopLeft(from, -5);
-				setTopRight(from, -4);
-				setBottomLeft(from, 3);
-				setBottomRight(from, 4);
-			}
-		}
-	}//end validSpots
-	
-	/** move method that allows the user to move
-	 * Will throw a CheckersIllegalMoveException if the from index is a spot that you don't own, or if you are trying to move to a spot that is not valid
-	 *  @param from the integer value of the index of the spot you are moving from
-	 *  @param to the integer value of the index of the spot you are moving to
-	 
-	 */
-	public void move(int from, int to) throws CheckersIllegalMoveException {
-		//either moves the piece (if its valid) or sends an exception
-		
-		if(correctOwner(from) == false)	//makes sure that its the correct owner, otherwise throws an exception
-		    throw new CheckersIllegalMoveException("Illegal Move, you do not have a piece at spot " + coordinates.get(from));
-		
-		validSpots(from);	//sets all the corners to their proper numbers so we can check it against the parameter 'to'
-		
-		if(to == topLeft || to == bottomLeft || to == topRight || to == bottomRight){
-			if(turn == 'x'){
-				if(pieces.get(from) == 'x'){
-					pieces.set(to,'x');
-				}else if(pieces.get(from) == 'X'){
-					pieces.set(to,'X');
-				}
-			}else if(turn == 'o'){
-				if(pieces.get(from) == 'o'){
-					pieces.set(to,'o');
-				}else if(pieces.get(from) == 'O'){
-					pieces.set(to,'O');
-				}
-			}
-			pieces.set(from, ' ');
-			//If you were able to move, checks if piece should be turned into a king
-			if(turn == 'x'){
-				if(pieces.get(to) == 'x'){
-					if(to+6 < from){ //if you jumped the piece
-						jumped = true;
-						if(to == topLeft){
-							pieces.set(jumpSpotTL, ' ');
-						}else if(to == topRight){
-							pieces.set(jumpSpotTR, ' ');
-						}else if(to == bottomLeft){
-							pieces.set(jumpSpotBL, ' ');
-						}else if(to == bottomRight){
-							pieces.set(jumpSpotBR, ' ');
-						}
-						--oCount;
-					}else{
-						jumped = false;
-					}
-				}else{	//its a KING
-					if(to+6 < from || to > from+6){ //if you jumped the piece
-						jumped = true;
-						if(to == topLeft){
-							pieces.set(jumpSpotTL, ' ');
-						}else if(to == topRight){
-							pieces.set(jumpSpotTR, ' ');
-						}else if(to == bottomLeft){
-							pieces.set(jumpSpotBL, ' ');
-						}else if(to == bottomRight){
-							pieces.set(jumpSpotBR, ' ');
-						}
-						--oCount;
-					}else{
-						jumped = false;
-					}
-				}
-				
-				if(to == 0 || to == 1 || to == 2 || to == 3){
-					pieces.set(to, 'X');
-				}
-				
-			}else if(turn == 'o'){
-				if(pieces.get(to) == 'o'){
-					if(to > from+6){ //if you jumped the piece
-						jumped = true;
-						if(to == topLeft){
-							pieces.set(jumpSpotTL, ' ');
-						}else if(to == topRight){
-							pieces.set(jumpSpotTR, ' ');
-						}else if(to == bottomLeft){
-							pieces.set(jumpSpotBL, ' ');
-						}else if(to == bottomRight){
-							pieces.set(jumpSpotBR, ' ');
-						}
-						--xCount;
-					}else{
-						jumped = false;
-					}
-				}else{	//its a KING
-					if(to+6 < from || to > from+6){ //if you jumped the piece
-						jumped = true;
-						if(to == topLeft){
-							pieces.set(jumpSpotTL, ' ');
-						}else if(to == topRight){
-							pieces.set(jumpSpotTR, ' ');
-						}else if(to == bottomLeft){
-							pieces.set(jumpSpotBL, ' ');
-						}else if(to == bottomRight){
-							pieces.set(jumpSpotBR, ' ');
-						}
-						--xCount;
-					}else{
-						jumped = false;
-					}
-				}
-				if(to == 28 || to == 29 || to == 30 || to == 31){
-					pieces.set(to, 'O');
-				}
-			}
-
-			//SWITCH TURNS
-			char temp = opponent;	
-			opponent = turn;
-			turn = temp;
-			jumped = false;
-		}else{	//if its not a valid spot to move to
-			throw new CheckersIllegalMoveException("Illegal Move.  You can not move " + coordinates.get(from) + " to " + coordinates.get(to));
-		}
-		
-		if(xCount == 0){
-			System.out.println("O WINS!");
-			winner = 'o';
-		}else if(oCount == 0){
-			System.out.println("X WINS!");
-			winner = 'x';
-		}
-	}//end move
-	
-	public int getOCount(){ return oCount; }
-	
-	public int getXCount(){ return xCount; }
-	
-	
-	/**A toString method for the CheckersBoard, allows easier access for console based interface
+	/** A toString method for the CheckersBoard, allows easier access for console based interface
 	 * @return result The result of the toString(), aka the gameBoard
 	 */
-	public String toString(){//prints out the checkerBoard
+	public String toString() {
 		String result;
 		result = " | A | B | C | D | E | F | G | H |";
-		
-		for(int i = 0; i < 32; i++){
-			if(i%4 == 0){
-				result += "\n-+---+---+---+---+---+---+---+---+\n";
-			}
-			
-			if(i == 0){
-				result += "1";
-			}else if(i == 4){
-				result += "2|";
-			}else if(i == 8){
-				result += "3";
-			}else if(i == 12){
-				result += "4|";
-			}else if(i == 16){
-				result += "5";
-			}else if(i == 20){
-				result += "6|";
-			}else if(i == 24){
-				result += "7";
-			}else if(i == 28){
-				result += "8|";
-			}
 
-			if(i < 4){
-				result += "|   | " + pieces.get(i) + " ";
-			}else if(i < 8){
-				result += " " + pieces.get(i) + " |   |";
-			}else if(i < 12){
-				result += "|   | " + pieces.get(i) + " ";
-			}else if(i < 16){
-				result += " " + pieces.get(i) + " |   |";
-			}else if(i < 20){
-				result += "|   | " + pieces.get(i) + " ";
-			}else if(i < 24){
-				result += " " + pieces.get(i) + " |   |";
-			}else if(i < 28){
-				result += "|   | " + pieces.get(i) + " ";
-			}else if(i < 32){
-				result += " " + pieces.get(i) + " |   |";
+		for (int i = 0; i < 8; i++) {
+			result += "\n-+---+---+---+---+---+---+---+---+\n";
+			result += Integer.toString(i + 1) + "|";
+			for (int j = 0; j < 8; j++) {
+				result += " " +  pieces[i][j] + " |";
 			}
-
-			if(i == 3 || i == 11 || i == 19 || i == 27){
-				result += "|";
-			}
-		}//end for
+		}
 		result += "\n-+---+---+---+---+---+---+---+---+\n";
 		return result;
-
-
-	}//end toString()
-
-	public String cleanCoord(String s){
-	    String r = s, Spre, Ssuf;
-	    char Cpre, Csuf;
-
-	     // S isn't 2 chars, invalid, return entry
-	    if (r.length() != 2) return s;
-
-	    
-	    Cpre = r.charAt(0);
-	    Csuf = r.charAt(1);
-	    
-	    // First make sure that format is <Letter><Digit>
-	    if (Character.isDigit(Cpre) && Character.isLetter(Csuf)) { // Format is <Digit><Letter>, switch it
-		char temp = Csuf;
-		Csuf = Cpre;
-		Cpre = temp;
-	    }
-
-	    Spre = String.valueOf(Cpre);
-	    Ssuf = String.valueOf(Csuf);
-
-	    Spre = Spre.toUpperCase();
-	    
-	    r = Spre + Ssuf;
-
-	    return r;
 	}
-}//end class Checkers
 
-/**
- | A | B | C | D | E | F | G | H |
--+---+---+---+---+---+---+---+---+
-1|   | o |   | o |   | o |   | o |
--+---+---+---+---+---+---+---+---+
-2| o |   | o |   | o |   | o |   |
--+---+---+---+---+---+---+---+---+
-3|   | o |   | o |   | o |   | o |
--+---+---+---+---+---+---+---+---+
-4|   |   |   |   |   |   |   |   |
--+---+---+---+---+---+---+---+---+
-5|   |   |   |   |   |   |   |   |
--+---+---+---+---+---+---+---+---+
-6| x |   | x |   | x |   | x |   |
--+---+---+---+---+---+---+---+---+
-7|   | x |   | x |   | x |   | x |
--+---+---+---+---+---+---+---+---+
-8| x |   | x |   | x |   | x |   |
--+---+---+---+---+---+---+---+---+
+	public char getTurn() { return turn; }
 
+	public void changeTurn() {
+		if (turn == 'x') turn = 'o';
+		else turn = 'x';
+		resetMoves();
+	}
 
--------------------------
-|__|00|__|01|__|02|__|03|
-|04|__|05|__|06|__|07|__|
-|__|08|__|09|__|10|__|11|
-|12|__|13|__|14|__|15|__|
-|__|16|__|17|__|18|__|19|
-|20|__|21|__|22|__|23|__|
-|__|24|__|25|__|26|__|27|
-|28|__|29|__|30|__|31|__|
--------------------------
+	public char getWinner() { return winner; }
 
-   |A|B|C|D|E|F|G|H|
--  -----------------
-1  |_|x|_|x|_|x|_|x|
-2  |x|_|x|_|x|_|x|_|
-3  |_|x|_|x|_|x|_|x|
-4  |_|_|_|_|_|_|_|_|
-5  |_|_|_|_|_|_|_|_|
-6  |o|_|o|_|o|_|o|_|
-7  |_|o|_|o|_|o|_|o|
-8  |o|_|o|_|o|_|o|_|
--  -----------------
-*/
+	public void checkWinner() {
+		if (xCount == 0) {
+			winner = 'o';
+		} else if (oCount == 0) {
+			winner = 'x';
+		}
+	}
+
+	public int getXCount() { return xCount; }
+
+	public int getOCount() { return oCount; }
+
+	public char getPiece(int i, int j) { return pieces[i][j]; }
+
+	// MOVEMENT FUNCTIONS 
+
+	public void move(int fromI, int fromJ, int toI, int toJ) {
+		setMoves(fromI, fromJ);
+		validMove(toI, toJ);
+
+		if (validMove) { // Valid coordinates input, execute the move
+			pieces[toI][toJ] = pieces[fromI][fromJ];
+			pieces[fromI][fromJ] = ' ';
+			if (canJump) { // Remove the jumped over piece
+				if (turn == 'x') oCount--;
+				else xCount--;
+				pieces[jumpedI][jumpedJ] = ' ';
+			}
+			if (makeKing(toI, toJ)) {
+				pieces[toI][toJ] = Character.toUpperCase(pieces[toI][toJ]);
+			}
+		}
+	}
+
+	public boolean moveWasMade() { return validMove; }
+
+	/** Move method that allows the user to move
+	 * Will throw a CheckersIllegalMoveException if the from index is a spot that you don't own, or if you are trying to move to a spot that is not valid
+	 *  @param from the integer value of the index of the spot you are moving from
+	 */
+	private void setMoves(int fromI, int fromJ) {
+		if (!correctOwner(fromI, fromJ)) {
+			//	    throw new CheckersIllegalMoveException("Thats not your piece");
+			System.out.println("Thats not your piece");
+			validMove = false;
+			return;
+		}
+
+		if (turn == 'x') forwardOffset      = X_MOVEMENT;
+		else forwardOffset                  = O_MOVEMENT;
+		kingOffset = forwardOffset * -1;
+
+		forward = fromI + forwardOffset;
+		left    = fromJ + LEFT_OFFSET;
+		right   = fromJ + RIGHT_OFFSET;
+
+		jumpForward = fromI + forwardOffset * JUMP_FACTOR;
+		jumpLeft    = fromJ + LEFT_OFFSET   * JUMP_FACTOR;
+		jumpRight   = fromJ + RIGHT_OFFSET  * JUMP_FACTOR;
+
+		if (Character.toUpperCase(turn) == pieces[fromI][fromJ]) {
+			backward     = fromI + kingOffset;
+			jumpBackward = fromI + kingOffset * JUMP_FACTOR;
+		} else { // Non kings cannot move backward
+			backward 	 = -1; 
+			jumpBackward = -1;
+		}
+	}
+
+	private void validMove(int toI, int toJ) {
+		boolean validLatMove, validLongMove, validLatJump, validLongJump;
+
+		validLatMove  = ((toJ == left) 			|| (toJ == right)		);
+		validLatJump  = ((toJ == jumpLeft) 		|| (toJ == jumpRight)	);
+		validLongMove = ((toI == forward) 		|| (toI == backward)	);
+		validLongJump = ((toI == jumpForward) 	|| (toI == jumpBackward));
+
+		if (validLatMove && validLongMove) { // tired to combine all this into one if statement with ||
+			squareOpen(toI, toJ);          // but wasnt working and worked when separated
+		} else if (validLatJump && validLongJump) { //see comment above
+			checkJump(toI, toJ);
+		} else { // Coords were valid but spot wasn't correct
+		validMove = false;
+		}
+	}
+
+	private void squareOpen(int i, int j) {
+		validMove = (pieces[i][j] == ' ');
+	}
+
+	/** Checks if the index you are moving from is owned by the correct owner
+	 * @param i,j The index of the spot you are trying to move
+	 * @return True if you own the spot, or False if you do not own it
+	 */
+	private boolean correctOwner(int i, int j) {
+		return ( (turn == pieces[i][j]) ||
+			(Character.toUpperCase(turn) == pieces[i][j]) );
+	}
+
+	private void jumped(int i, int j) {
+		if (turn == 'x') validMove = ((pieces[i][j] == 'o') || (pieces[i][j] == 'O'));
+		else validMove = ((pieces[i][j] == 'x') || (pieces[i][j] == 'X') );
+	}
+
+	/** Checks if the user input a valid jump, sets validMove to whether it was
+	* @param toI and toJ are valid jump coordinates from fromI and fromJ
+	*/
+	private void checkJump(int toI, int toJ) {
+		int checkI, checkJ;
+
+		// Set the check coords to the square that was jumped over
+		if (toI == jumpForward) {
+			checkI  = forward;
+		} else
+		checkI  = backward;
+
+		if (toJ == jumpLeft) {
+			checkJ  = left;
+		} else
+		checkJ  = right;
+
+		// Make sure that square had an opponent
+		jumped(checkI, checkJ);
+
+		if (validMove) {
+			canJump = true;
+			jumpedI = checkI;
+			jumpedJ = checkJ;
+		} else {
+			canJump = false;
+		}
+
+	}
+
+	private Boolean makeKing(int i, int j) {
+		if (turn == 'x') return (i == 0 && (j % 2 == 1));
+		else             return (i == 7 && (j % 2 == 0));
+	}
+
+	/** A formatting function that allows multiple different types of inputs
+	 * @param input from user, either piece theyre selecting or spot they want to move to
+	 * @return int array holding { x coordinate, y coordinate }
+	 */
+	public int[] parseInput(String s) {
+		char Cpre, Csuf;
+		int[] coords = new int[]{ -1, -1 };
+
+		// S isn't 2 chars, invalid, return entry
+		if (s.length() != 2) return coords;
+
+		Cpre = s.charAt(0);
+		Csuf = s.charAt(1);
+
+		// First make sure that format is <Letter><Digit>
+		if (Character.isDigit(Cpre) && Character.isLetter(Csuf)) { // Format is <Digit><Letter>, switch it
+			char temp = Csuf;
+			Csuf = Cpre;
+			Cpre = temp;
+		} else if (!(Character.isLetter(Cpre) && Character.isDigit(Csuf))) { // Was something other than a letter and digit
+			return coords;
+		}
+		Cpre = Character.toUpperCase(Cpre);
+
+		coords[1] = Cpre - 'A';
+		coords[0] = Character.getNumericValue(Csuf) - 1;
+
+		if (coords[0] < 0 || coords[0] > 7 || coords[1] < 0 || coords[1] > 7)
+			coords[0] = -1;
+		return coords;
+	}
+
+	public void resetMoves() {
+		forward = -1;
+		backward = -1;
+		left = -1;
+		right = -1;
+		forwardOffset = -1;
+		kingOffset = -1 ;
+		jumpedI = -1;
+		jumpedJ = -1;
+		canJump = false;
+		validMove = false;
+	}
+
+}//end class CheckersBoard

@@ -3,8 +3,11 @@ package edu.ucsb.cs56.projects.games.checkers;
 /** An interface to represent a place to send messages.
   
    @author Ryan Kroner
-   @version CS56, W12, UCSB, 02/23/2012
+   @author Graham Foster
+   @author Matthew Maatubang
+   @version UCSB CS56, F17
  */
+   
 public interface MessageDestination
 {
     /** 
