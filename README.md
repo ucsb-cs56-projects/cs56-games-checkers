@@ -1,7 +1,7 @@
 # cs56-games-checkers
 
-Ryan Kroner, W12
-Graham Foster, F17
+Ryan Kroner, W12  
+Graham Foster, F17  
 Matthew Maatubang, F17
 
 New version of checkers that includes the previous version of code reviews.
