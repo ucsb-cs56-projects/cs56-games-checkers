@@ -83,9 +83,12 @@ public class CheckersComponent extends JComponent
 		public void actionPerformed (ActionEvent event) {
 			char turn = game.getTurn();
 			char currentPiece = game.getPiece(currentI, currentJ);
+
+			
 		
 			if (!validFrom) { // Click to select piece
 				if ( (currentPiece == turn) || (currentPiece == Character.toUpperCase(turn)) ) { // Selected the correct players piece
+				    md.append("Select a square to move to\n");
 					fromI = currentI;
 					fromJ = currentJ;
 					validFrom = true;
@@ -95,13 +98,15 @@ public class CheckersComponent extends JComponent
 			} else { // Click to select destination
 				game.move(fromI, fromJ, currentI, currentJ);
 				if (!game.moveWasMade()) {
-					md.append("Invalid move, try again");
+					md.append("Invalid move, try again\n");
+					md.append("Select a " + turn + " piece to move from\n");
 					validFrom = false;
 					return;
 				} 
 				reprintBoard();			
 
 				game.changeTurn();
+				
 
 				if(game.getWinner() == 'x'){
 					md.append("X Wins!\n");
@@ -112,6 +117,7 @@ public class CheckersComponent extends JComponent
 				}
 
 				md.append(game.getTurn() + "'s turn:\n");
+				md.append("Select a " + game.getTurn() + " piece to move from\n");
 				validFrom = false;
 			}
 			return;
