@@ -1,9 +1,11 @@
 package edu.ucsb.cs56.projects.games.checkers;
 
-//Basic classes for checkers command line version
-// By Graham Foster and Matthew Maatubang
-// UCSB CS56, F17
-
+/** A series of JUnit tests to test checkerboard and moves
+   @author Ryan Kroner
+   @author Graham Foster
+   @author Matthew Maatubang
+   @version UCSB CS56, F17
+ */
 
 public class CheckersBoard implements CheckersGame {
 
@@ -20,10 +22,10 @@ public class CheckersBoard implements CheckersGame {
 	private int backward;
 	private int left;
 	private int right;
-        private int jumpForward;
-        private int jumpBackward;
-        private int jumpLeft;
-        private int jumpRight;
+	private int jumpForward;
+	private int jumpBackward;
+	private int jumpLeft;
+	private int jumpRight;
 	private int forwardOffset;
 	private int kingOffset;
 	private int jumpedI;
@@ -107,7 +109,7 @@ public class CheckersBoard implements CheckersGame {
 
 	public int getOCount() { return oCount; }
 
-        public char getPiece(int i, int j) { return pieces[i][j]; }
+	public char getPiece(int i, int j) { return pieces[i][j]; }
 
 	// MOVEMENT FUNCTIONS 
 
@@ -124,7 +126,7 @@ public class CheckersBoard implements CheckersGame {
 				pieces[jumpedI][jumpedJ] = ' ';
 			}
 			if (makeKing(toI, toJ)) {
-			    pieces[toI][toJ] = Character.toUpperCase(pieces[toI][toJ]);
+				pieces[toI][toJ] = Character.toUpperCase(pieces[toI][toJ]);
 			}
 		}
 	}
@@ -177,7 +179,7 @@ public class CheckersBoard implements CheckersGame {
 		} else if (validLatJump && validLongJump) { //see comment above
 			checkJump(toI, toJ);
 		} else { // Coords were valid but spot wasn't correct
-			validMove = false;
+		validMove = false;
 		}
 	}
 
@@ -191,11 +193,11 @@ public class CheckersBoard implements CheckersGame {
 	 */
 	private boolean correctOwner(int i, int j) {
 		return ( (turn == pieces[i][j]) ||
-		         (Character.toUpperCase(turn) == pieces[i][j]) );
+			(Character.toUpperCase(turn) == pieces[i][j]) );
 	}
 
 	private void jumped(int i, int j) {
-	        if (turn == 'x') validMove = ((pieces[i][j] == 'o') || (pieces[i][j] == 'O'));
+		if (turn == 'x') validMove = ((pieces[i][j] == 'o') || (pieces[i][j] == 'O'));
 		else validMove = ((pieces[i][j] == 'x') || (pieces[i][j] == 'X') );
 	}
 
@@ -209,12 +211,12 @@ public class CheckersBoard implements CheckersGame {
 		if (toI == jumpForward) {
 			checkI  = forward;
 		} else
-			checkI  = backward;
+		checkI  = backward;
 
 		if (toJ == jumpLeft) {
 			checkJ  = left;
 		} else
-			checkJ  = right;
+		checkJ  = right;
 
 		// Make sure that square had an opponent
 		jumped(checkI, checkJ);
@@ -254,7 +256,7 @@ public class CheckersBoard implements CheckersGame {
 			Csuf = Cpre;
 			Cpre = temp;
 		} else if (!(Character.isLetter(Cpre) && Character.isDigit(Csuf))) { // Was something other than a letter and digit
-		    return coords;
+			return coords;
 		}
 		Cpre = Character.toUpperCase(Cpre);
 

@@ -1,13 +1,11 @@
 package edu.ucsb.cs56.projects.games.checkers;
 
-/**
- * An interface for Checkers games
- * 
- * @author Matthew Maatubang ang Graham Foster
- * @version for CS56, F17
- * @see CheckersBoard
- * 
-*/
+/** An interface for Checkers games
+    @author Ryan Kroner
+    @author Graham Foster
+    @author Matthew Maatubang
+    @version UCSB CS56, F17
+ */
 
 public interface CheckersGame {
 

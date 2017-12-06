@@ -3,6 +3,13 @@ import java.util.ArrayList;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
+/** A series of JUnit tests to test checkerboard and moves
+   @author Ryan Kroner
+   @author Graham Foster
+   @author Matthew Maatubang
+   @version UCSB CS56, F17
+ */
+
 public class CheckersTest
 {
 	@Test

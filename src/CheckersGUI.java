@@ -6,13 +6,13 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import java.awt.BorderLayout;
 
-/**
- * CheckersGui.java is a GUI for playing Checkers
- *
- * @author Ryan Kroner
- * @version for CS56, W12, UCSB, 03/12/2012
- * @see CheckersTest
+/** A GUI implementation of checkers game
+   @author Ryan Kroner
+   @author Graham Foster
+   @author Matthew Maatubang
+   @version UCSB CS56, F17
  */
+
 public class CheckersGUI {
 
     /** main method to fire up a JFrame on the screen  

@@ -1,6 +1,13 @@
 package edu.ucsb.cs56.projects.games.checkers;
 import java.util.Scanner;
 
+/** A command line implementation of the CheckersGame
+   @author Ryan Kroner
+   @author Graham Foster
+   @author Matthew Maatubang
+   @version UCSB CS56, F17
+ */
+
 public class TextCheckers {
 	public static void main(String [] args) {
 		Scanner sc          = new Scanner(System.in);

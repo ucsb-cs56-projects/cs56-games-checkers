@@ -8,10 +8,11 @@ import java.awt.Font;
 import java.util.ArrayList;
 import javax.swing.JTextArea;
 
-/**
- * @author Matthew Maatubang
- * @version for UCSB CS56, F17 
- * @see CheckersBoard
+/** A series of JUnit tests to test checkerboard and moves
+   @author Ryan Kroner
+   @author Graham Foster
+   @author Matthew Maatubang
+   @version UCSB CS56, F17
  */
 
 public class CheckersComponent extends JComponent
