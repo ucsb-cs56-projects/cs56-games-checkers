@@ -10,7 +10,7 @@ b. At current state, there is a gui and command line version of this game in som
 
 c. It can run, and there are two options command line and gui. In command line you have two user coordinate to move checkers.
 
-...In gui, you can click the checker to play with yourslef or a friend.
+   In gui, you can click the checker to play with yourslef or a friend.
 
 d...* As a user, I can play checker game with computer.
 
