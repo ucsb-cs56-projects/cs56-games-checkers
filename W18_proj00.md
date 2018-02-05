@@ -4,7 +4,7 @@ a. In this checkers project, we going to fix some bug an d make this checker gam
 
 b. At current state, there is a gui and command line version of this game in some poor condition. 
 
- ⋅⋅*  As a user, I can play checker game with my firend at gui.
+ ⋅ ⋅ *  As a user, I can play checker game with my firend at gui.
 
  ⋅⋅*  As a user, I can play checker game with my firend at command line.
 
