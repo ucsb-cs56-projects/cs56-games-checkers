@@ -1,0 +1,1584 @@
+
+
+2018-02-01 18:11              src/CheckersBoard.java              Page 1
+
+
+    1	package edu.ucsb.cs56.projects.games.checkers;
+    2	
+    3	/** A series of JUnit tests to test checkerboard and moves
+    4	   @author Ryan Kroner
+    5	   @author Graham Foster
+    6	   @author Matthew Maatubang
+    7	   @version UCSB CS56, F17
+    8	 */
+    9	
+   10	public class CheckersBoard implements CheckersGame {
+   11	
+   12		// BOARD VARS
+   13		private char[][] pieces         = new char[8][8]; // 2D array of pieces
+   14		private char turn               = 'x';            // x alwayds starts
+   15		private char winner             = ' ';            // changed to either x,o, or t at end of game
+   16		private int xCount              = 12;             // count of x pieces
+   17		private int oCount              = 12;             // count of o pieces
+   18	
+   19	
+   20		// MOVEMENT DIRECTION VARS
+   21		private int forward;
+   22		private int backward;
+   23		private int left;
+   24		private int right;
+   25		private int jumpForward;
+   26		private int jumpBackward;
+   27		private int jumpLeft;
+   28		private int jumpRight;
+   29		private int forwardOffset;
+   30		private int kingOffset;
+   31		private int jumpedI;
+   32		private int jumpedJ;
+   33		private static int X_MOVEMENT	= -1;
+   34		private static int O_MOVEMENT	= 1;
+   35		private static int LEFT_OFFSET  = -1;
+   36		private static int RIGHT_OFFSET = 1;
+   37		private static int JUMP_FACTOR  = 2;
+   38		private boolean canJump         = false;          // true if can jump, false if not
+   39		private boolean validMove       = false;
+   40	
+   41	
+   42	
+   43		// BOARD FUNCTIONS
+   44	
+   45		/**
+   46		*
+   47		*/
+   48		public CheckersBoard() {
+   49			for (int j = 0; j < 8; j++) {
+   50				if (j % 2 == 0) {
+   51					pieces[0][j] = ' ';
+   52					pieces[1][j] = 'o';
+   53					pieces[2][j] = ' ';
+   54					pieces[3][j] = ' ';
+   55					pieces[4][j] = ' ';
+   56					pieces[5][j] = 'x';
+
+
+
+
+
+
+
+2018-02-01 18:11              src/CheckersBoard.java              Page 2
+
+
+   57					pieces[6][j] = ' ';
+   58					pieces[7][j] = 'x';
+   59				} else {
+   60					pieces[0][j] = 'o';
+   61					pieces[1][j] = ' ';
+   62					pieces[2][j] = 'o';
+   63					pieces[3][j] = ' ';
+   64					pieces[4][j] = ' ';
+   65					pieces[5][j] = ' ';
+   66					pieces[6][j] = 'x';
+   67					pieces[7][j] = ' ';
+   68				}
+   69			}
+   70		}
+   71	
+   72		/** A toString method for the CheckersBoard, allows easier access for console based interface
+   73		 * @return result The result of the toString(), aka the gameBoard
+   74		 */
+   75		public String toString() {
+   76			String result;
+   77			result = " | A | B | C | D | E | F | G | H |";
+   78	
+   79			for (int i = 0; i < 8; i++) {
+   80				result += "\n-+---+---+---+---+---+---+---+---+\n";
+   81				result += Integer.toString(i + 1) + "|";
+   82				for (int j = 0; j < 8; j++) {
+   83					result += " " +  pieces[i][j] + " |";
+   84				}
+   85			}
+   86			result += "\n-+---+---+---+---+---+---+---+---+\n";
+   87			return result;
+   88		}
+   89	
+   90		public char getTurn() { return turn; }
+   91	
+   92		public void changeTurn() {
+   93			if (turn == 'x') turn = 'o';
+   94			else turn = 'x';
+   95			resetMoves();
+   96		}
+   97	
+   98		public char getWinner() { return winner; }
+   99	
+  100		public void checkWinner() {
+  101			if (xCount == 0) {
+  102				winner = 'o';
+  103			} else if (oCount == 0) {
+  104				winner = 'x';
+  105			}
+  106		}
+  107	
+  108		public int getXCount() { return xCount; }
+  109	
+  110		public int getOCount() { return oCount; }
+  111	
+  112		public char getPiece(int i, int j) { return pieces[i][j]; }
+
+
+
+
+
+
+
+2018-02-01 18:11              src/CheckersBoard.java              Page 3
+
+
+  113	
+  114		// MOVEMENT FUNCTIONS 
+  115	
+  116		public void move(int fromI, int fromJ, int toI, int toJ) {
+  117			setMoves(fromI, fromJ);
+  118			validMove(toI, toJ);
+  119	
+  120			if (validMove) { // Valid coordinates input, execute the move
+  121				pieces[toI][toJ] = pieces[fromI][fromJ];
+  122				pieces[fromI][fromJ] = ' ';
+  123				if (canJump) { // Remove the jumped over piece
+  124					if (turn == 'x') oCount--;
+  125					else xCount--;
+  126					pieces[jumpedI][jumpedJ] = ' ';
+  127				}
+  128				if (makeKing(toI, toJ)) {
+  129					pieces[toI][toJ] = Character.toUpperCase(pieces[toI][toJ]);
+  130				}
+  131			}
+  132		}
+  133	
+  134		public boolean moveWasMade() { return validMove; }
+  135	
+  136		/** Move method that allows the user to move
+  137		 * Will throw a CheckersIllegalMoveException if the from index is a spot that you don't own, or if you are trying to move to a spot that is not valid
+  138		 *  @param from the integer value of the index of the spot you are moving from
+  139		 */
+  140		private void setMoves(int fromI, int fromJ) {
+  141			if (!correctOwner(fromI, fromJ)) {
+  142				//	    throw new CheckersIllegalMoveException("Thats not your piece");
+  143				System.out.println("Thats not your piece");
+  144				validMove = false;
+  145				return;
+  146			}
+  147	
+  148			if (turn == 'x') forwardOffset      = X_MOVEMENT;
+  149			else forwardOffset                  = O_MOVEMENT;
+  150			kingOffset = forwardOffset * -1;
+  151	
+  152			forward = fromI + forwardOffset;
+  153			left    = fromJ + LEFT_OFFSET;
+  154			right   = fromJ + RIGHT_OFFSET;
+  155	
+  156			jumpForward = fromI + forwardOffset * JUMP_FACTOR;
+  157			jumpLeft    = fromJ + LEFT_OFFSET   * JUMP_FACTOR;
+  158			jumpRight   = fromJ + RIGHT_OFFSET  * JUMP_FACTOR;
+  159	
+  160			if (Character.toUpperCase(turn) == pieces[fromI][fromJ]) {
+  161				backward     = fromI + kingOffset;
+  162				jumpBackward = fromI + kingOffset * JUMP_FACTOR;
+  163			} else { // Non kings cannot move backward
+  164				backward 	 = -1; 
+  165				jumpBackward = -1;
+  166			}
+  167		}
+  168	
+
+
+
+
+
+
+
+2018-02-01 18:11              src/CheckersBoard.java              Page 4
+
+
+  169		private void validMove(int toI, int toJ) {
+  170			boolean validLatMove, validLongMove, validLatJump, validLongJump;
+  171	
+  172			validLatMove  = ((toJ == left) 			|| (toJ == right)		);
+  173			validLatJump  = ((toJ == jumpLeft) 		|| (toJ == jumpRight)	);
+  174			validLongMove = ((toI == forward) 		|| (toI == backward)	);
+  175			validLongJump = ((toI == jumpForward) 	|| (toI == jumpBackward));
+  176	
+  177			if (validLatMove && validLongMove) { // tired to combine all this into one if statement with ||
+  178				squareOpen(toI, toJ);          // but wasnt working and worked when separated
+  179			} else if (validLatJump && validLongJump) { //see comment above
+  180				checkJump(toI, toJ);
+  181			} else { // Coords were valid but spot wasn't correct
+  182			validMove = false;
+  183			}
+  184		}
+  185	
+  186		private void squareOpen(int i, int j) {
+  187			validMove = (pieces[i][j] == ' ');
+  188		}
+  189	
+  190		/** Checks if the index you are moving from is owned by the correct owner
+  191		 * @param i,j The index of the spot you are trying to move
+  192		 * @return True if you own the spot, or False if you do not own it
+  193		 */
+  194		private boolean correctOwner(int i, int j) {
+  195			return ( (turn == pieces[i][j]) ||
+  196				(Character.toUpperCase(turn) == pieces[i][j]) );
+  197		}
+  198	
+  199		private void jumped(int i, int j) {
+  200			if (turn == 'x') validMove = ((pieces[i][j] == 'o') || (pieces[i][j] == 'O'));
+  201			else validMove = ((pieces[i][j] == 'x') || (pieces[i][j] == 'X') );
+  202		}
+  203	
+  204		/** Checks if the user input a valid jump, sets validMove to whether it was
+  205		* @param toI and toJ are valid jump coordinates from fromI and fromJ
+  206		*/
+  207		private void checkJump(int toI, int toJ) {
+  208			int checkI, checkJ;
+  209	
+  210			// Set the check coords to the square that was jumped over
+  211			if (toI == jumpForward) {
+  212				checkI  = forward;
+  213			} else
+  214			checkI  = backward;
+  215	
+  216			if (toJ == jumpLeft) {
+  217				checkJ  = left;
+  218			} else
+  219			checkJ  = right;
+  220	
+  221			// Make sure that square had an opponent
+  222			jumped(checkI, checkJ);
+  223	
+  224			if (validMove) {
+
+
+
+
+
+
+
+2018-02-01 18:11              src/CheckersBoard.java              Page 5
+
+
+  225				canJump = true;
+  226				jumpedI = checkI;
+  227				jumpedJ = checkJ;
+  228			} else {
+  229				canJump = false;
+  230			}
+  231	
+  232		}
+  233	
+  234		private Boolean makeKing(int i, int j) {
+  235			if (turn == 'x') return (i == 0 && (j % 2 == 1));
+  236			else             return (i == 7 && (j % 2 == 0));
+  237		}
+  238	
+  239		/** A formatting function that allows multiple different types of inputs
+  240		 * @param input from user, either piece theyre selecting or spot they want to move to
+  241		 * @return int array holding { x coordinate, y coordinate }
+  242		 */
+  243		public int[] parseInput(String s) {
+  244			char Cpre, Csuf;
+  245			int[] coords = new int[]{ -1, -1 };
+  246	
+  247			// S isn't 2 chars, invalid, return entry
+  248			if (s.length() != 2) return coords;
+  249	
+  250			Cpre = s.charAt(0);
+  251			Csuf = s.charAt(1);
+  252	
+  253			// First make sure that format is <Letter><Digit>
+  254			if (Character.isDigit(Cpre) && Character.isLetter(Csuf)) { // Format is <Digit><Letter>, switch it
+  255				char temp = Csuf;
+  256				Csuf = Cpre;
+  257				Cpre = temp;
+  258			} else if (!(Character.isLetter(Cpre) && Character.isDigit(Csuf))) { // Was something other than a letter and digit
+  259				return coords;
+  260			}
+  261			Cpre = Character.toUpperCase(Cpre);
+  262	
+  263			coords[1] = Cpre - 'A';
+  264			coords[0] = Character.getNumericValue(Csuf) - 1;
+  265	
+  266			if (coords[0] < 0 || coords[0] > 7 || coords[1] < 0 || coords[1] > 7)
+  267				coords[0] = -1;
+  268			return coords;
+  269		}
+  270	
+  271		public void resetMoves() {
+  272			forward = -1;
+  273			backward = -1;
+  274			left = -1;
+  275			right = -1;
+  276			forwardOffset = -1;
+  277			kingOffset = -1 ;
+  278			jumpedI = -1;
+  279			jumpedJ = -1;
+  280			canJump = false;
+
+
+
+
+
+
+
+2018-02-01 18:11              src/CheckersBoard.java              Page 6
+
+
+  281			validMove = false;
+  282		}
+  283	
+  284	}//end class CheckersBoard
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2018-02-01 18:11            src/CheckersComponent.java            Page 1
+
+
+    1	package edu.ucsb.cs56.projects.games.checkers;
+    2	import java.awt.GridLayout;
+    3	import javax.swing.JComponent;
+    4	import javax.swing.JButton;
+    5	import java.awt.event.ActionListener;
+    6	import java.awt.event. ActionEvent;
+    7	import java.awt.Font;
+    8	import java.util.ArrayList;
+    9	import javax.swing.JTextArea;
+   10	
+   11	/** A series of JUnit tests to test checkerboard and moves
+   12	   @author Ryan Kroner
+   13	   @author Graham Foster
+   14	   @author Matthew Maatubang
+   15	   @version UCSB CS56, F17
+   16	 */
+   17	
+   18	public class CheckersComponent extends JComponent
+   19	{
+   20	    private CheckersGame game;
+   21	    private MessageDestination md;
+   22	
+   23	    private JButton[][] squares  = new JButton[8][8];	//spots that an "x" or an "o" can go
+   24	    
+   25	    private int fromI = -1;
+   26	    private int fromJ = -1;
+   27	    private boolean validFrom = false;
+   28	
+   29	    /** Constructor
+   30	     *
+   31	     * @param game a CheckersGame object that keeps track of the game 
+   32	     * @param md allows messages to be displayed under the game board in the GUI
+   33	     */
+   34	       
+   35	    public CheckersComponent(CheckersGame g, MessageDestination m) {
+   36			super();
+   37		
+   38			game = g;	//A Game of Checkers
+   39			md = m;		//md, where we can write messages
+   40	
+   41			// Sets number of rows to 8 (makes an 8x8 board).  This for loop sets up the board	
+   42			this.setLayout(new GridLayout(8,0));
+   43		
+   44			// Sets up the board initially (spots you can move to)
+   45			for (int i = 0; i < 8; i++) {
+   46				for (int j = 0; j < 8; j++) {
+   47				        squares[i][j] = makeButton(game.getPiece(i, j), i, j);
+   48					this.add(squares[i][j]);
+   49				}
+   50			}
+   51	
+   52			md.append(game.getTurn() + "'s turn:\n");
+   53	    } // End constructor 
+   54	    
+   55	    public JButton makeButton(char c, int i, int j){
+   56		        String label = String.valueOf(c);
+
+
+
+
+
+
+
+2018-02-01 18:11            src/CheckersComponent.java            Page 2
+
+
+   57			JButton jb = new JButton(label);
+   58			jb.addActionListener(new ButtonListener(i, j)); 
+   59			return jb;
+   60	    }
+   61	    
+   62	    //function used to set the spots on the GUI after performing a move
+   63	    public void reprintBoard(){
+   64	    	JButton jb;
+   65			for (int i = 0; i < 8; i++) {
+   66				for (int j = 0; j < 8; j++) {
+   67					jb = squares[i][j];
+   68					jb.setText(String.valueOf(game.getPiece(i, j)));
+   69				}
+   70			}
+   71	
+   72	    }
+   73	
+   74	    class ButtonListener implements ActionListener {    
+   75			private int currentI, currentJ;	// Index of the button that is pressed
+   76	
+   77			public ButtonListener(int i, int j) {
+   78		    	super();
+   79		    	currentI = i;
+   80		    	currentJ = j;
+   81			}
+   82	
+   83			public void actionPerformed (ActionEvent event) {
+   84				char turn = game.getTurn();
+   85				char currentPiece = game.getPiece(currentI, currentJ);
+   86	
+   87				
+   88			
+   89				if (!validFrom) { // Click to select piece
+   90					if ( (currentPiece == turn) || (currentPiece == Character.toUpperCase(turn)) ) { // Selected the correct players piece
+   91					    md.append("Select a square to move to\n");
+   92						fromI = currentI;
+   93						fromJ = currentJ;
+   94						validFrom = true;
+   95					} else{
+   96						md.append("You don't own this square, please select an " + turn + " piece that you own\n");
+   97					}
+   98				} else { // Click to select destination
+   99					game.move(fromI, fromJ, currentI, currentJ);
+  100					if (!game.moveWasMade()) {
+  101						md.append("Invalid move, try again\n");
+  102						md.append("Select a " + turn + " piece to move from\n");
+  103						validFrom = false;
+  104						return;
+  105					} 
+  106					reprintBoard();			
+  107	
+  108					game.changeTurn();
+  109					
+  110	
+  111					if(game.getWinner() == 'x'){
+  112						md.append("X Wins!\n");
+
+
+
+
+
+
+
+2018-02-01 18:11            src/CheckersComponent.java            Page 3
+
+
+  113						return;
+  114					} else if (game.getWinner() == 'o'){
+  115						md.append("O Wins!\n");
+  116						return;
+  117					}
+  118	
+  119					md.append(game.getTurn() + "'s turn:\n");
+  120					md.append("Select a " + game.getTurn() + " piece to move from\n");
+  121					validFrom = false;
+  122				}
+  123				return;
+  124			}
+  125	    } // End class ButtonListener
+  126	
+  127	} // End class CheckersComponent
+  128	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2018-02-01 18:11              src/CheckersGame.java               Page 1
+
+
+    1	package edu.ucsb.cs56.projects.games.checkers;
+    2	
+    3	/** An interface for Checkers games
+    4	    @author Ryan Kroner
+    5	    @author Graham Foster
+    6	    @author Matthew Maatubang
+    7	    @version UCSB CS56, F17
+    8	 */
+    9	
+   10	public interface CheckersGame {
+   11	
+   12		// BOARD FUNCTIONS
+   13	
+   14		/** A toString method for the CheckersBoard
+   15		* Allows easier access for console based interface
+   16		* @return A String containing the gameBoard
+   17		*/
+   18		public String toString(); 
+   19	
+   20		/**  Returns who will make the next move
+   21		* @return 'x' or 'o' depending on the move
+   22		*/
+   23		public char getTurn(); 
+   24	
+   25		/**  Changes the current turn of the internal CheckersBoard
+   26		* @return Internally switch between 'x' and 'o' depending on the previous move
+   27		*/
+   28		public void changeTurn(); 
+   29		
+   30		/**  Returns the winner of the game
+   31		* @return 'x' or 'o' depending on the loser having 0 pieces
+   32		*/
+   33		public char getWinner(); 
+   34	
+   35		/**  Checks the # of x's and o's remaining on board
+   36		* Sets winner if a player has 0 pieces left
+   37		* @return Internally set 'x' or 'o' depending on the move
+   38		*/
+   39		public void checkWinner(); 
+   40	
+   41		/**  Returns number of 'x' pieces
+   42		* @return # of x's remaining on board
+   43		*/
+   44		public int getXCount(); 
+   45	
+   46		/**  Returns number of 'o' pieces
+   47		* @return # of o's remaining
+   48		*/
+   49		public int getOCount(); 
+   50	
+   51	        /** Return char at the coordinates
+   52		* @return Value of the piece at i, j
+   53		*/
+   54	        public char getPiece(int i , int j);
+   55	    
+   56		// MOVEMENT FUNCTIONS 
+
+
+
+
+
+
+
+2018-02-01 18:11              src/CheckersGame.java               Page 2
+
+
+   57	
+   58		/**  Moves a piece from the from coordinates to the to coordinates, if possible
+   59		* @return Internally execute move if possible, do nothing otherwise
+   60		*/
+   61		public void move(int fromI, int fromJ, int toI, int toJ); 
+   62		
+   63		/**  Returns whether an entered move was actually executed
+   64		* @return true if the move was made, false otherwise
+   65		*/
+   66		public boolean moveWasMade(); 
+   67	
+   68		/** A formatting function that allows multiple different types of inputs
+   69		 * @param input from user, either piece theyre selecting or spot they want to move to
+   70		 * @return int array holding { x coordinate, y coordinate }
+   71		 */
+   72		public int[] parseInput(String s); 
+   73	
+   74	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2018-02-01 18:11               src/CheckersGUI.java               Page 1
+
+
+    1	package edu.ucsb.cs56.projects.games.checkers;
+    2	import javax.swing.JFrame;
+    3	import java.awt.ComponentOrientation;
+    4	import javax.swing.JTextArea;
+    5	import javax.swing.JScrollPane;
+    6	import javax.swing.ScrollPaneConstants;
+    7	import java.awt.BorderLayout;
+    8	
+    9	/** A GUI implementation of checkers game
+   10	   @author Ryan Kroner
+   11	   @author Graham Foster
+   12	   @author Matthew Maatubang
+   13	   @version UCSB CS56, F17
+   14	 */
+   15	
+   16	public class CheckersGUI {
+   17	
+   18	    /** main method to fire up a JFrame on the screen  
+   19	          @param args not used
+   20	     */
+   21	
+   22	    public static void main (String[] args) {
+   23	       JFrame frame = new JFrame() ;
+   24	       frame. setDefaultCloseOperation(JFrame. EXIT_ON_CLOSE) ;
+   25	       
+   26	       // A JTextArea (see p. 414-415 of textbook)
+   27	       JTextAreaMessageDestination message = new JTextAreaMessageDestination(10,30);
+   28	       JScrollPane messageScroller = new JScrollPane(message);
+   29	       messageScroller.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+   30	       messageScroller.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+   31	       frame.getContentPane().add(BorderLayout.SOUTH,messageScroller);
+   32	       
+   33	       // since TicTacToeGrid implements the TicTacToeGame interface,
+   34	       // we can use TicTacToeGame on left hand side.
+   35	
+   36	       CheckersGame game = new CheckersBoard();
+   37	       CheckersComponent cc = new CheckersComponent(game, message);
+   38	       frame.getContentPane().add(cc);
+   39	
+   40	       // to make sure that grids go left to right, no matter what
+   41	
+   42	       frame.applyComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+   43	       frame.setSize(800,800);
+   44	       frame.setVisible(true);
+   45	    }
+   46	}
+   47	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2018-02-01 18:11      src/CheckersIllegalMoveException.java       Page 1
+
+
+    1	package edu.ucsb.cs56.projects.games.checkers;
+    2	
+    3	/**
+    4	 * An exception for illegal moves in Checkers, used in the CheckersBoard
+    5	 * 
+    6	 * @author Ryan Kroner
+    7	 * @version for CS56, W12, UCSB, 02/23/2012
+    8	 * @see CheckersBoard
+    9	 * 
+   10	*/
+   11	
+   12	public class CheckersIllegalMoveException extends RuntimeException {
+   13	
+   14	    public CheckersIllegalMoveException () {};
+   15	    
+   16	    public CheckersIllegalMoveException (String message) {
+   17		super(message);
+   18	    }
+   19	}
+   20	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2018-02-01 18:11              src/CheckersTest.java               Page 1
+
+
+    1	package edu.ucsb.cs56.projects.games.checkers;
+    2	import java.util.ArrayList;
+    3	import org.junit.Test;
+    4	import static org.junit.Assert.assertEquals;
+    5	
+    6	/** A series of JUnit tests to test checkerboard and moves
+    7	   @author Ryan Kroner
+    8	   @author Graham Foster
+    9	   @author Matthew Maatubang
+   10	   @version UCSB CS56, F17
+   11	 */
+   12	
+   13	public class CheckersTest
+   14	{
+   15		@Test
+   16		public void testToString01(){
+   17			CheckersBoard c = new CheckersBoard();
+   18			assertEquals((	" | A | B | C | D | E | F | G | H |\n"+
+   19					"-+---+---+---+---+---+---+---+---+\n"+
+   20					"1|   | o |   | o |   | o |   | o |\n"+
+   21					"-+---+---+---+---+---+---+---+---+\n"+
+   22					"2| o |   | o |   | o |   | o |   |\n"+
+   23					"-+---+---+---+---+---+---+---+---+\n"+
+   24					"3|   | o |   | o |   | o |   | o |\n"+
+   25					"-+---+---+---+---+---+---+---+---+\n"+
+   26					"4|   |   |   |   |   |   |   |   |\n"+
+   27					"-+---+---+---+---+---+---+---+---+\n"+
+   28					"5|   |   |   |   |   |   |   |   |\n"+
+   29					"-+---+---+---+---+---+---+---+---+\n"+
+   30					"6| x |   | x |   | x |   | x |   |\n"+
+   31					"-+---+---+---+---+---+---+---+---+\n"+
+   32					"7|   | x |   | x |   | x |   | x |\n"+
+   33					"-+---+---+---+---+---+---+---+---+\n"+
+   34					"8| x |   | x |   | x |   | x |   |\n"+
+   35					"-+---+---+---+---+---+---+---+---+\n"), c.toString());
+   36		}
+   37		
+   38		@Test
+   39		public void testToString02(){
+   40			CheckersBoard c = new CheckersBoard();
+   41			assertEquals((	" | A | B | C | D | E | F | G | H |\n"+
+   42					"-+---+---+---+---+---+---+---+---+\n"+
+   43					"1|   | o |   | o |   | o |   | o |\n"+
+   44					"-+---+---+---+---+---+---+---+---+\n"+
+   45					"2| o |   | o |   | o |   | o |   |\n"+
+   46					"-+---+---+---+---+---+---+---+---+\n"+
+   47					"3|   | o |   | o |   | o |   | o |\n"+
+   48					"-+---+---+---+---+---+---+---+---+\n"+
+   49					"4|   |   |   |   |   |   |   |   |\n"+
+   50					"-+---+---+---+---+---+---+---+---+\n"+
+   51					"5|   |   |   |   |   |   |   |   |\n"+
+   52					"-+---+---+---+---+---+---+---+---+\n"+
+   53					"6| x |   | x |   | x |   | x |   |\n"+
+   54					"-+---+---+---+---+---+---+---+---+\n"+
+   55					"7|   | x |   | x |   | x |   | x |\n"+
+   56					"-+---+---+---+---+---+---+---+---+\n"+
+
+
+
+
+
+
+
+2018-02-01 18:11              src/CheckersTest.java               Page 2
+
+
+   57					"8| x |   | x |   | x |   | x |   |\n"+
+   58					"-+---+---+---+---+---+---+---+---+\n"), c.toString());
+   59			c.move(5,6,4,5);
+   60			assertEquals((	" | A | B | C | D | E | F | G | H |\n"+
+   61					"-+---+---+---+---+---+---+---+---+\n"+
+   62					"1|   | o |   | o |   | o |   | o |\n"+
+   63					"-+---+---+---+---+---+---+---+---+\n"+
+   64					"2| o |   | o |   | o |   | o |   |\n"+
+   65					"-+---+---+---+---+---+---+---+---+\n"+
+   66					"3|   | o |   | o |   | o |   | o |\n"+
+   67					"-+---+---+---+---+---+---+---+---+\n"+
+   68					"4|   |   |   |   |   |   |   |   |\n"+
+   69					"-+---+---+---+---+---+---+---+---+\n"+
+   70					"5|   |   |   |   |   | x |   |   |\n"+
+   71					"-+---+---+---+---+---+---+---+---+\n"+
+   72					"6| x |   | x |   | x |   |   |   |\n"+
+   73					"-+---+---+---+---+---+---+---+---+\n"+
+   74					"7|   | x |   | x |   | x |   | x |\n"+
+   75					"-+---+---+---+---+---+---+---+---+\n"+
+   76					"8| x |   | x |   | x |   | x |   |\n"+
+   77					"-+---+---+---+---+---+---+---+---+\n"), c.toString());
+   78			c.move(2,5,3,4);
+   79			assertEquals((	" | A | B | C | D | E | F | G | H |\n"+
+   80					"-+---+---+---+---+---+---+---+---+\n"+
+   81					"1|   | o |   | o |   | o |   | o |\n"+
+   82					"-+---+---+---+---+---+---+---+---+\n"+
+   83					"2| o |   | o |   | o |   | o |   |\n"+
+   84					"-+---+---+---+---+---+---+---+---+\n"+
+   85					"3|   | o |   | o |   |   |   | o |\n"+
+   86					"-+---+---+---+---+---+---+---+---+\n"+
+   87					"4|   |   |   |   | o |   |   |   |\n"+
+   88					"-+---+---+---+---+---+---+---+---+\n"+
+   89					"5|   |   |   |   |   | x |   |   |\n"+
+   90					"-+---+---+---+---+---+---+---+---+\n"+
+   91					"6| x |   | x |   | x |   |   |   |\n"+
+   92					"-+---+---+---+---+---+---+---+---+\n"+
+   93					"7|   | x |   | x |   | x |   | x |\n"+
+   94					"-+---+---+---+---+---+---+---+---+\n"+
+   95					"8| x |   | x |   | x |   | x |   |\n"+
+   96					"-+---+---+---+---+---+---+---+---+\n"), c.toString());
+   97			c.move(5,2,4,3);
+   98			assertEquals((	" | A | B | C | D | E | F | G | H |\n"+
+   99					"-+---+---+---+---+---+---+---+---+\n"+
+  100					"1|   | o |   | o |   | o |   | o |\n"+
+  101					"-+---+---+---+---+---+---+---+---+\n"+
+  102					"2| o |   | o |   | o |   | o |   |\n"+
+  103					"-+---+---+---+---+---+---+---+---+\n"+
+  104					"3|   | o |   | o |   |   |   | o |\n"+
+  105					"-+---+---+---+---+---+---+---+---+\n"+
+  106					"4|   |   |   |   | o |   |   |   |\n"+
+  107					"-+---+---+---+---+---+---+---+---+\n"+
+  108					"5|   |   |   | x |   | x |   |   |\n"+
+  109					"-+---+---+---+---+---+---+---+---+\n"+
+  110					"6| x |   |   |   | x |   |   |   |\n"+
+  111					"-+---+---+---+---+---+---+---+---+\n"+
+  112					"7|   | x |   | x |   | x |   | x |\n"+
+
+
+
+
+
+
+
+2018-02-01 18:11              src/CheckersTest.java               Page 3
+
+
+  113					"-+---+---+---+---+---+---+---+---+\n"+
+  114					"8| x |   | x |   | x |   | x |   |\n"+
+  115					"-+---+---+---+---+---+---+---+---+\n"), c.toString());
+  116			c.move(3,4,5,2);
+  117			assertEquals((	" | A | B | C | D | E | F | G | H |\n"+
+  118					"-+---+---+---+---+---+---+---+---+\n"+
+  119					"1|   | o |   | o |   | o |   | o |\n"+
+  120					"-+---+---+---+---+---+---+---+---+\n"+
+  121					"2| o |   | o |   | o |   | o |   |\n"+
+  122					"-+---+---+---+---+---+---+---+---+\n"+
+  123					"3|   | o |   | o |   |   |   | o |\n"+
+  124					"-+---+---+---+---+---+---+---+---+\n"+
+  125					"4|   |   |   |   |   |   |   |   |\n"+
+  126					"-+---+---+---+---+---+---+---+---+\n"+
+  127					"5|   |   |   |   |   | x |   |   |\n"+
+  128					"-+---+---+---+---+---+---+---+---+\n"+
+  129					"6| x |   | o |   | x |   |   |   |\n"+
+  130					"-+---+---+---+---+---+---+---+---+\n"+
+  131					"7|   | x |   | x |   | x |   | x |\n"+
+  132					"-+---+---+---+---+---+---+---+---+\n"+
+  133					"8| x |   | x |   | x |   | x |   |\n"+
+  134					"-+---+---+---+---+---+---+---+---+\n"), c.toString());
+  135			c.move(6,1,4,3);
+  136			assertEquals((	" | A | B | C | D | E | F | G | H |\n"+
+  137					"-+---+---+---+---+---+---+---+---+\n"+
+  138					"1|   | o |   | o |   | o |   | o |\n"+
+  139					"-+---+---+---+---+---+---+---+---+\n"+
+  140					"2| o |   | o |   | o |   | o |   |\n"+
+  141					"-+---+---+---+---+---+---+---+---+\n"+
+  142					"3|   | o |   | o |   |   |   | o |\n"+
+  143					"-+---+---+---+---+---+---+---+---+\n"+
+  144					"4|   |   |   |   |   |   |   |   |\n"+
+  145					"-+---+---+---+---+---+---+---+---+\n"+
+  146					"5|   |   |   | x |   | x |   |   |\n"+
+  147					"-+---+---+---+---+---+---+---+---+\n"+
+  148					"6| x |   |   |   | x |   |   |   |\n"+
+  149					"-+---+---+---+---+---+---+---+---+\n"+
+  150					"7|   |   |   | x |   | x |   | x |\n"+
+  151					"-+---+---+---+---+---+---+---+---+\n"+
+  152					"8| x |   | x |   | x |   | x |   |\n"+
+  153					"-+---+---+---+---+---+---+---+---+\n"), c.toString());
+  154		}
+  155		
+  156	    /*@Test
+  157		public void testJump01(){
+  158			CheckersBoard c = new CheckersBoard();
+  159			c.move(21,17);
+  160			c.move(10,14);
+  161			c.move(17,10);
+  162			assertEquals(11,c.getOCount());
+  163			assertEquals(12,c.getXCount());		
+  164		}
+  165		
+  166		@Test
+  167		public void testJump02(){
+  168			CheckersBoard c = new CheckersBoard();
+
+
+
+
+
+
+
+2018-02-01 18:11              src/CheckersTest.java               Page 4
+
+
+  169			c.move(21,16);
+  170			c.move(8,12);
+  171			c.move(23,19);
+  172			c.move(12,21);
+  173			c.move(25,16);
+  174			assertEquals((	" | A | B | C | D | E | F | G | H |\n"+
+  175					"-+---+---+---+---+---+---+---+---+\n"+
+  176					"1|   | o |   | o |   | o |   | o |\n"+
+  177					"-+---+---+---+---+---+---+---+---+\n"+
+  178					"2| o |   | o |   | o |   | o |   |\n"+
+  179					"-+---+---+---+---+---+---+---+---+\n"+
+  180					"3|   |   |   | o |   | o |   | o |\n"+
+  181					"-+---+---+---+---+---+---+---+---+\n"+
+  182					"4|   |   |   |   |   |   |   |   |\n"+
+  183					"-+---+---+---+---+---+---+---+---+\n"+
+  184					"5|   | x |   |   |   |   |   | x |\n"+
+  185					"-+---+---+---+---+---+---+---+---+\n"+
+  186					"6| x |   |   |   | x |   |   |   |\n"+
+  187					"-+---+---+---+---+---+---+---+---+\n"+
+  188					"7|   | x |   |   |   | x |   | x |\n"+
+  189					"-+---+---+---+---+---+---+---+---+\n"+
+  190					"8| x |   | x |   | x |   | x |   |\n"+
+  191					"-+---+---+---+---+---+---+---+---+\n"), c.toString());
+  192		}
+  193		
+  194		@Test
+  195		public void testJump03(){
+  196			CheckersBoard c = new CheckersBoard();
+  197			c.move(22,17);
+  198			c.move(11,15);
+  199			c.move(17,13);
+  200			c.move(15,19);
+  201			c.move(26,22);
+  202			c.move(8,17);
+  203			c.move(21,14);
+  204			c.move(19,26);
+  205			assertEquals((	" | A | B | C | D | E | F | G | H |\n"+
+  206					"-+---+---+---+---+---+---+---+---+\n"+
+  207					"1|   | o |   | o |   | o |   | o |\n"+
+  208					"-+---+---+---+---+---+---+---+---+\n"+
+  209					"2| o |   | o |   | o |   | o |   |\n"+
+  210					"-+---+---+---+---+---+---+---+---+\n"+
+  211					"3|   |   |   | o |   | o |   |   |\n"+
+  212					"-+---+---+---+---+---+---+---+---+\n"+
+  213					"4|   |   |   |   | x |   |   |   |\n"+
+  214					"-+---+---+---+---+---+---+---+---+\n"+
+  215					"5|   |   |   |   |   |   |   |   |\n"+
+  216					"-+---+---+---+---+---+---+---+---+\n"+
+  217					"6| x |   |   |   | x |   |   |   |\n"+
+  218					"-+---+---+---+---+---+---+---+---+\n"+
+  219					"7|   | x |   | x |   | o |   | x |\n"+
+  220					"-+---+---+---+---+---+---+---+---+\n"+
+  221					"8| x |   | x |   | x |   | x |   |\n"+
+  222					"-+---+---+---+---+---+---+---+---+\n"), c.toString());
+  223		}
+  224		
+
+
+
+
+
+
+
+2018-02-01 18:11              src/CheckersTest.java               Page 5
+
+
+  225		@Test
+  226		public void testNoWinner01(){
+  227			CheckersBoard c = new CheckersBoard();
+  228			assertEquals(' ',c.getWinner());
+  229		}
+  230		
+  231		@Test
+  232		public void testNoWinner02(){
+  233			CheckersBoard c = new CheckersBoard();
+  234			c.move(22,17);
+  235			c.move(11,15);
+  236			c.move(17,13);
+  237			c.move(15,19);
+  238			c.move(26,22);
+  239			c.move(8,17);
+  240			c.move(21,14);
+  241			c.move(19,26);
+  242			assertEquals(' ',c.getWinner());
+  243		}
+  244		
+  245		
+  246		@Test(expected=CheckersIllegalMoveException.class)
+  247		public void testBadOwner01(){
+  248			CheckersBoard c = new CheckersBoard();
+  249			c.move(8,13);
+  250		}
+  251		
+  252		@Test(expected=CheckersIllegalMoveException.class)
+  253		public void testBadOwner02(){
+  254			CheckersBoard c = new CheckersBoard();
+  255			c.move(21,17);
+  256			c.move(17,13);
+  257		}
+  258		
+  259		@Test(expected=CheckersIllegalMoveException.class)
+  260		public void testBadOwner03(){
+  261			CheckersBoard c = new CheckersBoard();
+  262			c.move(17,22);
+  263		}
+  264		
+  265		@Test(expected=CheckersIllegalMoveException.class)
+  266		public void testBadOwner04(){
+  267			CheckersBoard c = new CheckersBoard();
+  268			c.move(22,17);
+  269			c.move(11,15);
+  270			c.move(17,13);
+  271			c.move(15,19);
+  272			c.move(26,22);
+  273			c.move(8,17);
+  274			c.move(21,14);
+  275			c.move(19,26);
+  276			c.move(21,17);
+  277		}
+  278		
+  279		@Test(expected=CheckersIllegalMoveException.class)
+  280		public void testIllegalMove01(){
+
+
+
+
+
+
+
+2018-02-01 18:11              src/CheckersTest.java               Page 6
+
+
+  281			CheckersBoard c = new CheckersBoard();
+  282			c.move(21,22);
+  283		}
+  284		
+  285		@Test(expected=CheckersIllegalMoveException.class)
+  286		public void testIllegalMove02(){
+  287			CheckersBoard c = new CheckersBoard();
+  288			c.move(21,12);
+  289		}
+  290		
+  291		@Test(expected=CheckersIllegalMoveException.class)
+  292		public void testIllegalMove03(){
+  293			CheckersBoard c = new CheckersBoard();
+  294			c.move(22,17);
+  295			c.move(11,20);
+  296		}
+  297		
+  298		@Test(expected=CheckersIllegalMoveException.class)
+  299		public void testIllegalMove04(){
+  300			CheckersBoard c = new CheckersBoard();
+  301			c.move(22,17);
+  302			c.move(11,15);
+  303			c.move(17,13);
+  304			c.move(15,19);
+  305			c.move(26,17);
+  306		}
+  307		
+  308		@Test(expected=CheckersIllegalMoveException.class)
+  309		public void testMoveToIsOccupied01(){
+  310			CheckersBoard c = new CheckersBoard();
+  311			c.move(25,21);
+  312		}
+  313		
+  314		@Test(expected=CheckersIllegalMoveException.class)
+  315		public void testMoveToIsOccupied02(){
+  316			CheckersBoard c = new CheckersBoard();
+  317			c.move(26,23);
+  318		}
+  319		
+  320		@Test(expected=CheckersIllegalMoveException.class)
+  321		public void testMoveToIsOccupied03(){
+  322			CheckersBoard c = new CheckersBoard();
+  323			c.move(21,16);
+  324			c.move(4,8);
+  325		}
+  326		
+  327		@Test(expected=CheckersIllegalMoveException.class)
+  328		public void testMoveToIsOccupied04(){
+  329			CheckersBoard c = new CheckersBoard();
+  330			c.move(21,16);
+  331			c.move(8,12);
+  332			c.move(16,12);
+  333		}
+  334		
+  335		@Test(expected=CheckersIllegalMoveException.class)
+  336		public void testMoveToIsOccupied05(){
+
+
+
+
+
+
+
+2018-02-01 18:11              src/CheckersTest.java               Page 7
+
+
+  337			CheckersBoard c = new CheckersBoard();
+  338			c.move(21,16);
+  339			c.move(8,12);
+  340			c.move(16,13);
+  341			c.move(9,13);
+  342			}*/
+  343	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2018-02-01 18:11       src/JTextAreaMessageDestination.java       Page 1
+
+
+    1	package edu.ucsb.cs56.projects.games.checkers;
+    2	import javax.swing.JTextArea;
+    3	
+    4	 /**
+    5	 * A JTextArea object that implements the MessageDestination interface. Used in TicTacToeComponent.
+    6	 *
+    7	 * @author Ryan Kroner
+    8	 * @version for CS56, W12, UCSB, 03/12/2012
+    9	 * @see CheckersTest
+   10	 */
+   11	public class JTextAreaMessageDestination extends JTextArea implements MessageDestination
+   12	{
+   13	    /** 
+   14		Create a JTextArea that implements the MessageDestination interface.  This is a direct
+   15		pass-thru to the JTextArea constructor.
+   16	
+   17		@param rows (see documentation for javax.swing.JTextArea)
+   18		@param cols (see documentation for javax.swing.JTextArea)
+   19		@see javax.swing.JTextArea
+   20	    */
+   21		
+   22	    public JTextAreaMessageDestination(int rows, int cols) {
+   23		super(rows, cols);
+   24	    }
+   25	
+   26	    // there is already a public void append(String msg); method in JTextArea
+   27	    // so that's all we have to do.
+   28	}
+   29	
+   30	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2018-02-01 18:11           src/MessageDestination.java            Page 1
+
+
+    1	package edu.ucsb.cs56.projects.games.checkers;
+    2	
+    3	/** An interface to represent a place to send messages.
+    4	  
+    5	   @author Ryan Kroner
+    6	   @author Graham Foster
+    7	   @author Matthew Maatubang
+    8	   @version UCSB CS56, F17
+    9	 */
+   10	   
+   11	public interface MessageDestination
+   12	{
+   13	    /** 
+   14		Get this string to the user
+   15		@param msg String to send to the user
+   16	     */
+   17	    public void append(String msg);
+   18	}
+   19	
+   20	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2018-02-01 18:11              src/TextCheckers.java               Page 1
+
+
+    1	package edu.ucsb.cs56.projects.games.checkers;
+    2	import java.util.Scanner;
+    3	
+    4	/** A command line implementation of the CheckersGame
+    5	   @author Ryan Kroner
+    6	   @author Graham Foster
+    7	   @author Matthew Maatubang
+    8	   @version UCSB CS56, F17
+    9	 */
+   10	
+   11	public class TextCheckers {
+   12		public static void main(String [] args) {
+   13			Scanner sc          = new Scanner(System.in);
+   14			int[] from          = new int[2];
+   15			int[] to            = new int[2];
+   16			boolean done        = false;
+   17			boolean moveWasMade = true;
+   18			char winner         = ' ';
+   19			String input;
+   20	
+   21	
+   22			System.out.println("To play, enter the piece coordinates of the piece you want to move, then enter, then the spot you want to move it to");
+   23	
+   24			CheckersBoard c = new CheckersBoard();
+   25	
+   26			while (!done) {
+   27				System.out.println(c); // c.toString() implicitly invoked
+   28				System.out.println("" + c.getTurn() + "'s turn: ");
+   29	
+   30				do {
+   31					// Read from command line
+   32					input = sc.next();
+   33					from  = c.parseInput(input);
+   34					input = sc.next();
+   35					to    = c.parseInput(input);
+   36	
+   37					// If bad coordinates are entered or the move was invalid, ask for new inputs
+   38					if ( from[0] == -1 || to[0] == -1 )  {
+   39						System.out.println("Invalid coordinates, please input different coordinates:  ");
+   40					} else {
+   41						c.move(from[0], from[1], to[0], to[1]);
+   42						moveWasMade = c.moveWasMade();
+   43						if (!moveWasMade) {
+   44							System.out.println("Invalid move, please input a valid move: ");
+   45						}
+   46					}
+   47				} while (!moveWasMade);
+   48	
+   49				c.checkWinner();
+   50				if (c.getWinner() != ' ') {
+   51					winner = c.getWinner();
+   52					done = true;
+   53				}
+   54				c.changeTurn();
+   55			} // end while
+   56	
+
+
+
+
+
+
+
+2018-02-01 18:11              src/TextCheckers.java               Page 2
+
+
+   57			System.out.println(c);
+   58			System.out.println(winner + " wins!");
+   59			System.out.println("Game Over!");
+   60		}
+   61	
+   62	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
