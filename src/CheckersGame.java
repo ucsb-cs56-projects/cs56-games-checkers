@@ -71,4 +71,13 @@ public interface CheckersGame {
 	 */
 	public int[] parseInput(String s); 
 
+	// W18 Fuheng Zhao Douglas Gao;
+	public void recordHistory();
+	
+	public void retract(int times);
+
+	public void recordText(String s1, String s2);
+
+	public void printText();
+
 }
