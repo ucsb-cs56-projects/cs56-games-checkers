@@ -3,13 +3,32 @@
 Ryan Kroner, W12  
 Graham Foster, F17  
 Matthew Maatubang, F17
+Fuheng Zhao, Runyu Gao W18
+
 
 New version of checkers that includes the previous version of code reviews.
-As well as fixes some of the issues in command line version of the game
+As well as fixes some of the issues in command line version of the game.
+We added a retract history method to return to pervious game state. This feature is added for both gui and command line version, and updates the readme file.
 
-Also will include: A GUI that allows two players to play checkers against each other, also will include ability to get a "king" to move around freely.
 
-Original: Basic classes for Checkers, Non-GUI. Plus a J-Unit Test similar to Lab 07 from S11:
+How to play and test:
+you can use ant run to play the command line version of the checkers game. In the game you can type the checkers coordinate to move your pieces. 
+You can also type retract and then enter number of steps you want to get back, to return to the that state of game.
+
+You can use ant gui to invoke the gui version of the checkers game. Then, you can click the pieces and then click a possible spot to move it. 
+There is also a retract button so that you can enter the number of steps you want to get back, to return to that state of game.
+
+To test the code, you can enter ant test.
+
+You can type ant clean to clean the classes. 
+
+You can also type ant compile to see if your changes is compilable.
+
+
+Also will include: A basic AI and fix some issues in build.xmli (the old version of the build.xml contains many unnecessary targets and codes);
+
+Orginal:A GUI that allows two players to play checkers against each other, also will include ability to get a "king" to move around freely from F17.
+Basic classes for Checkers, Non-GUI. Plus a J-Unit Test similar to Lab 07 from S11:
 
 F17 Final Remarks:
 
