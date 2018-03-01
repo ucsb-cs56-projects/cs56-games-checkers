@@ -5,11 +5,9 @@
        name: Ryan Kroner for CS56, W12 -->
 
   <property environment="env"/> <!-- load the environment variables --> 
-   <property name="webRoot" value="${env.HOME}/public_html/" />
-   <property name="webBaseUrl" value="http://www.cs.ucsb.edu/~${env.USER}" />
 
   <property name="course" value="cs56" />
-  <property name="quarter" value="W12" />
+  <property name="quarter" value="W18" />
   <property name="issueNum" value="0000466" />
   <property name="fullPkg" value="edu.ucsb.cs56.projects.games.checkers" />
   <property name="mainClass" value="TextCheckers" />
@@ -35,17 +33,17 @@
 
   </target>
 
-  <target name="run" depends="compile" description="runs the class ${mainClass}">
+  <target name="run" depends="compile" description="runs the class ${mainClass}, so that you can play with the command line version of the checkers game.">
     <java classname="${fullPkg}.${mainClass}"  >  
        <classpath refid="project.class.path" />
     </java>
   </target>
   
-  <target name="gui" depends="compile" description="runs the class ${guiMainClass}">
+  <target name="gui" depends="compile" description="runs the class ${guiMainClass}, so that you can play the gui version.">
     <java fork="true" classname="${fullPkg}.${guiMainClass}" classpath="build" /> 
   </target>
 
-  <target name="clean" >
+  <target name="clean" description="to delete all .classes">
     <delete failonerror="false" verbose="true">
       <fileset dir="build" includes="**/*.class"/>
     </delete>
@@ -109,74 +107,5 @@
    </jar>
  </target>
 
- <target name="download" > 
  
-  <delete quiet="true"> 
-     <fileset dir="temp" includes="**/*" />  
-     <fileset dir="download" includes="**/*" />  
-  </delete> 
- 
-  <mkdir dir="download" /> 
-  <mkdir dir="temp" />  
-  <mkdir dir="temp/${projectName}" /> 
- 
-  <copy todir="temp/${projectName}"> 
-    <fileset dir="." 
-     excludes="build/**, javadoc/**, **/*~, temp/**, dist/**, download/**"/> 
-  </copy> 
- 
-  <tar destfile="temp/${projectName}.tar"
-       basedir="temp"
-       includes="${projectName}/**" 
-   /> 
- 
-  <zip destfile="download/${projectName}.zip"
-       basedir="temp"
-       includes="${projectName}/**"
-  /> 
- 
-  <delete quiet="true"> 
-     <fileset dir="temp" includes="**/*"/>  
-  </delete> 
-  
-</target> 
- 
- <target name="publish" depends="jar,javadoc,download,linenumbers">
-   <mkdir dir="${webRoot}/${projectPath}" />
-  
-   <delete dir="${webRoot}/${projectPath}/browse" />
-   <mkdir dir="${webRoot}/${projectPath}/browse" />
-
-   <delete dir="${webRoot}/${projectPath}/download" />
-   <mkdir dir="${webRoot}/${projectPath}/download" />
-
-   <copy file="html/index.html" todir="${webRoot}/${projectPath}"/>
-
-   <copy todir="${webRoot}/${projectPath}/download" > 
-     <fileset dir="download"/> 
-     <fileset dir="dist" />
-   </copy> 
-   
-   <copy file="build.xml" todir="${webRoot}/${projectPath}/browse"/>
-
-   <copy file="numberedsource.txt" todir="${webRoot}/${projectPath}/browse"/>  
-   
-   <copy todir="${webRoot}/${projectPath}/browse/src" > 
-     <fileset dir="src"/> 
-   </copy> 
-
-
-   <chmod dir="${webRoot}/${projectPath}" 
-	  perm="755" type="both" includes="**/*"/>
-
-   <echo>Project published to ${webBaseUrl}/${projectPath}</echo> 
- </target>
- 
- <target name="linenumbers" description="Creates a file containing all source files with line numbers">               
-   <exec executable="bash">                                                                                          
-     <arg value="-c"/>                                                                                               
-     <arg value='tree -ifQ src | grep \.java\"$ | xargs pr -n > numberedsource.txt'/>                                
-   </exec>                                                                                                           
-</target>  
-
 </project>

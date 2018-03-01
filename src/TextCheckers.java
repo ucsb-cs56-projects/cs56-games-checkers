@@ -14,7 +14,7 @@ public class TextCheckers {
 		int[] from          = new int[2];
 		int[] to            = new int[2];
 		boolean done        = false;
-		boolean moveWasMade = true;
+		boolean moveWasMade = false;
 		char winner         = ' ';
 		String input;
 		String input2;
@@ -29,10 +29,10 @@ public class TextCheckers {
 			System.out.println(c); // c.toString() implicitly invoked
 			System.out.println("" + c.getTurn() + "'s turn: ");
 			
-
+			c.recordHistory();
 			do {
-				//added
-				c.recordHistory();
+			
+				
 
 				input = sc.next();
 				//System.out.println(input);
@@ -64,7 +64,7 @@ public class TextCheckers {
 				//	System.out.println("Record History");
 				
 				// If bad coordinates are entered or the move was invalid, ask for new inputs
-					if ( from[0] == -1 || to[0] == -1 )  {
+					if(from[0] == -1 || to[0] == -1 || input.charAt(0)=='r'){
 						System.out.println("Invalid coordinates, please input different coordinates:  ");
 					} 	
 					else {
@@ -79,7 +79,7 @@ public class TextCheckers {
 							c.printText();
 						}
 					
-				}
+					}
 				}
 			
 
@@ -97,5 +97,4 @@ public class TextCheckers {
 		System.out.println(winner + " wins!");
 		System.out.println("Game Over!");
 	}
-
 }

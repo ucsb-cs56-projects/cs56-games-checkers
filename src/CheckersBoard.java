@@ -41,7 +41,7 @@ public class CheckersBoard implements CheckersGame {
 	private boolean validMove       = false;
 
 	private Stack<char [][]> history=new Stack<char [][]>();
-        private Stack<Integer> xstack = new Stack<Integer>();
+    private Stack<Integer> xstack = new Stack<Integer>();
 	private Stack<Integer> ostack = new Stack<Integer>();
 	private Stack<Integer> kingstack = new Stack<Integer>();
 	private ArrayList<String> hisText=new ArrayList<String>();
@@ -78,6 +78,7 @@ public class CheckersBoard implements CheckersGame {
 		hisText.add(turn+" moved from "+s1+" to "+s2);
 	
 	}
+
 	public void printText(){
 		for(int i=0; i<hisText.size();i++){
 			System.out.println(i+": "+hisText.get(i));
@@ -115,7 +116,7 @@ public class CheckersBoard implements CheckersGame {
 		oCount=ostack.pop();
 		xCount=xstack.pop();
 		kingOffset=kingstack.pop();
-		
+		//validMove=true;
 		if(times%2==0){
 			if(turn=='x')
 				turn='o';
@@ -123,6 +124,23 @@ public class CheckersBoard implements CheckersGame {
 				turn='x';
 			}
 		}
+	
+	}
+
+	public void retractgui(int times){
+		pieces=history.pop();
+		resetMoves();
+		oCount=ostack.pop();
+		xCount=xstack.pop();
+		kingOffset=kingstack.pop();
+		//validMove=true;
+	
+		if(turn=='x')
+			turn='o';
+		else{
+			turn='x';
+			}
+		
 	
 	}
 

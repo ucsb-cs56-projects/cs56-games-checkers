@@ -79,5 +79,7 @@ public interface CheckersGame {
 	public void recordText(String s1, String s2);
 
 	public void printText();
+	
+	public void retractgui(int times);
 
 }
