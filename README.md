@@ -25,7 +25,7 @@ You can type ant clean to clean the classes.
 You can also type ant compile to see if your changes is compilable.
 
 
-Also will include: A basic AI and fix some issues in build.xmli (the old version of the build.xml contains many unnecessary targets and codes);
+Also will include: A basic AI and fix some issues in build.xmli (the old version of the build.xml contains many unnecessary targets and codes), and fix some jump, "king", etc. bugs;
 
 Orginal:A GUI that allows two players to play checkers against each other, also will include ability to get a "king" to move around freely from F17.
 Basic classes for Checkers, Non-GUI. Plus a J-Unit Test similar to Lab 07 from S11:
