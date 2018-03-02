@@ -1,7 +1,6 @@
 Fuheng Zhao, Runyu Gao
 
-a. In this checkers project, we are going to simulate two players playing checker game with each other. Potentially, we will add an AI so that the player can play by him/herself. We are also going to fix some bug and make this checker game more fun.
-
+a. In this checkers project, you can simulate two players playing checker game with each other. In this checker game, you want to defeat your opponent by elemination all the opponents' pieces. You can either play the commandline or gui version of this game for fun.
 b. At current state, there is a gui and command line version of this game in some poor condition. 
 
   As a user, I can play checker game with my firend at gui so that I can gain friendship.
