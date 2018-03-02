@@ -1,6 +1,6 @@
 Fuheng Zhao, Runyu Gao
 
-a. In this checkers project, we going to fix some bug an d make this checker game more fun.
+a. In this checkers project, we are going to simulate two players playing checker game with each other. Potentially, we will add an AI so that the player can play by him/herself. We are also going to fix some bug and make this checker game more fun.
 
 b. At current state, there is a gui and command line version of this game in some poor condition. 
 
@@ -24,6 +24,6 @@ g. Yes, this project has enough issues to earn 1000 points.
 
 h. Not yet
 
-i. I think most of code are in good condition.
+i. I think most of code are in good condition. The build.xml and readme need to be updated.
 
 j. The test code covered most of the logical issues.
