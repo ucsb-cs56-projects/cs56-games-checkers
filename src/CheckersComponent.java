@@ -3,12 +3,18 @@ import java.awt.GridLayout;
 import javax.swing.JComponent;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
-import java.awt.event. ActionEvent;
+import java.awt.event.ActionEvent;
 import java.awt.Font;
+import java.io.*;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
 import java.util.ArrayList;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.Icon;
+import javax.swing.text.JTextComponent;
+import javax.swing.text.DefaultCaret;
 
 /** A series of JUnit tests to test checkerboard and moves
    @author Ryan Kroner
@@ -20,7 +26,7 @@ import javax.swing.Icon;
 public class CheckersComponent extends JComponent
 {
     private CheckersGame game;
-    private MessageDestination md;
+    private JTextArea md;
     private JTextArea hist;
     private JTextField jf;
     private JButton[][] squares  = new JButton[8][8];	//spots that an "x" or an "o" can go
@@ -35,11 +41,13 @@ public class CheckersComponent extends JComponent
      * @param md allows messages to be displayed under the game board in the GUI
      */
        
-    public CheckersComponent(CheckersGame g, MessageDestination m, JTextArea h, JTextField j1) {
+    public CheckersComponent(CheckersGame g, JTextArea m, JTextArea h, JTextField j1) {
 		super();
 	
 		game = g;	//A Game of Checkers
-		md = m;		//md, where we can write messages
+		md = m;	//md, where we can write messages
+		DefaultCaret caret = (DefaultCaret)md.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		hist=h;
 		jf=j1;
 		// Sets number of rows to 8 (makes an 8x8 board).  This for loop sets up the board	
@@ -140,15 +148,19 @@ public class CheckersComponent extends JComponent
 		
 			if (!validFrom) { // Click to select piece
 				if ( (currentPiece == turn) || (currentPiece == Character.toUpperCase(turn)) ) { // Selected the correct players piece
+				    squares[currentI][currentJ].setForeground(Color.RED);
 				    md.append("Select a square to move to\n");
 					fromI = currentI;
 					fromJ = currentJ;
 					validFrom = true;
+					//squares[currentI][currentJ].setForeground(Color.BLACK);
 				} else{
 					md.append("You don't own this square, please select an " + turn + " piece that you own\n");
 				}
 			} else { // Click to select destination
 				game.recordHistory();
+				squares[fromI][fromJ].setForeground(Color.BLACK);
+				squares[currentI][currentJ].setForeground(Color.BLACK);
 				game.move(fromI, fromJ, currentI, currentJ);
 				if (!game.moveWasMade()) {
 					md.append("Invalid move, try again\n");

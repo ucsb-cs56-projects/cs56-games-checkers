@@ -231,6 +231,9 @@ public class CheckersBoard implements CheckersGame {
 
 	public void move(int fromI, int fromJ, int toI, int toJ) {
 		setMoves(fromI, fromJ);
+		if(validMove==false){
+			return;
+		}
 		validMove(toI, toJ);
 
 		if (validMove) { // Valid coordinates input, execute the move
@@ -247,6 +250,29 @@ public class CheckersBoard implements CheckersGame {
 			}
 		}
 	}
+	public void moveAI(int fromI, int fromJ, int toI, int toJ) {
+                setMovesAI(fromI, fromJ);
+                if(validMove==false){
+                        return;
+                }
+                validMove(toI, toJ);
+
+                if (validMove) { // Valid coordinates input, execute the move
+                        //recordHistory();
+                    pieces.get(toI).get(toJ).setName(pieces.get(fromI).get(fromJ).getName());
+                    pieces.get(fromI).get(fromJ).setName(' ');
+                        if (canJump) { // Remove the jumped over piece
+                                if (turn == 'x') oCount--;
+                                else xCount--;
+                                pieces.get(jumpedI).get(jumpedJ).setName(' ');
+                        }
+                        if (makeKing(toI, toJ)) {
+                            pieces.get(toI).get(toJ).setName(Character.toUpperCase(pieces.get(toI).get(toJ).getName()));
+                        }
+                }
+        }
+
+
 
 	public boolean moveWasMade() { return validMove; }
 
@@ -261,6 +287,7 @@ public class CheckersBoard implements CheckersGame {
 			validMove = false;
 			return;
 		}
+		if(correctOwner(fromI, fromJ)) validMove=true;
 
 		if (turn == 'x') forwardOffset      = X_MOVEMENT;
 		else forwardOffset                  = O_MOVEMENT;
@@ -282,6 +309,38 @@ public class CheckersBoard implements CheckersGame {
 			jumpBackward = -1;
 		}
 	}
+
+
+        private void setMovesAI(int fromI, int fromJ) {
+                if (!correctOwner(fromI, fromJ)) {
+                        //          throw new CheckersIllegalMoveException("Thats not your piece");
+                        validMove = false;
+                        return;
+                }
+                if(correctOwner(fromI, fromJ)) validMove=true;
+
+                if (turn == 'x') forwardOffset      = X_MOVEMENT;
+                else forwardOffset                  = O_MOVEMENT;
+                kingOffset = forwardOffset * -1;
+
+                forward = fromI + forwardOffset;
+                left    = fromJ + LEFT_OFFSET;
+                right   = fromJ + RIGHT_OFFSET;
+
+                jumpForward = fromI + forwardOffset * JUMP_FACTOR;
+                jumpLeft    = fromJ + LEFT_OFFSET   * JUMP_FACTOR;
+                jumpRight   = fromJ + RIGHT_OFFSET  * JUMP_FACTOR;
+
+                if (Character.toUpperCase(turn) == pieces.get(fromI).get(fromJ).getName()) {
+                        backward     = fromI + kingOffset;
+                        jumpBackward = fromI + kingOffset * JUMP_FACTOR;
+                } else { // Non kings cannot move backward
+                        backward         = -1;
+                        jumpBackward = -1;
+                }
+        }
+
+
 
 	private void validMove(int toI, int toJ) {
 		boolean validLatMove, validLongMove, validLatJump, validLongJump;
