@@ -166,7 +166,7 @@ public class CheckersTest
 	@Test
 	public void testJump02(){
 		CheckersBoard c = new CheckersBoard();
-ugh.		c.move(21,16);
+		c.move(21,16);
 		c.move(8,12);
 		c.move(23,19);
 		c.move(12,21);

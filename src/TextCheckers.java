@@ -24,7 +24,7 @@ public class TextCheckers {
 		System.out.println("To play, enter the piece coordinates of the piece you want to move, then enter, then the spot you want to move it to. You can also use retract, and then enter how many steps you want to move back.");
 
 		CheckersBoard c = new CheckersBoard();
-
+		System.out.println("pig\n");
 		while (!done) {
 			System.out.println(c); // c.toString() implicitly invoked
 			System.out.println("" + c.getTurn() + "'s turn: ");

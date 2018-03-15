@@ -8,6 +8,7 @@ import java.awt.Font;
 import java.util.ArrayList;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.Icon;
 
 /** A series of JUnit tests to test checkerboard and moves
    @author Ryan Kroner
@@ -20,10 +21,8 @@ public class CheckersComponent extends JComponent
 {
     private CheckersGame game;
     private MessageDestination md;
-    ///////////////////////
     private JTextArea hist;
     private JTextField jf;
-    //////////////////////////
     private JButton[][] squares  = new JButton[8][8];	//spots that an "x" or an "o" can go
     private int fromI = -1;
     private int fromJ = -1;
@@ -50,12 +49,13 @@ public class CheckersComponent extends JComponent
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
 			        squares[i][j] = makeButton(game.getPiece(i, j), i, j);
+			        
 				this.add(squares[i][j]);
 			}
 		}
 		
-		md.append(game.getTurn() + "'s turn, Or you can go back to previous turn by enter a number in the box at the very top.\n");
-		hist.append("HISTORY:(not for retract)\n");
+		md.append(game.getTurn() + "'s turn, Or you can go back to previous turn by enter a number in the box above\n");
+		hist.append("HISTORY:\n");
 		jf.addActionListener(new FieldListener());
     } // End constructor 
     
@@ -84,6 +84,7 @@ public class CheckersComponent extends JComponent
     	public void actionPerformed(ActionEvent event){
     		String k = jf.getText();
     		int z = Integer.parseInt(String.valueOf(k));
+    		reprintBoard();
     		//game.set(6,1);
     		/*for (int i =0;i<8;i++){
     			for (int j = 0; j < 8; j++){
@@ -102,7 +103,7 @@ public class CheckersComponent extends JComponent
     			int b = a.length();
 				hist.replaceRange("",b-28,b);
 			}
-
+			reprintBoard();
     		//hist.append(String.valueOf(game.ep()));
 
 
@@ -118,6 +119,7 @@ public class CheckersComponent extends JComponent
     		//game.move(5,2,4,3);
        		reprintBoard();
        		md.append("Retracted! It is " + game.getTurn() +" turn\n");
+       		reprintBoard();
 		}
     }
 
