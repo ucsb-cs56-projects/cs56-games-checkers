@@ -36,7 +36,7 @@ public class AICheckers {
 //		remove.add();
 
 
-		System.out.println("This is the AI version of the game, in which you can play the checker game by yourself.");
+		System.out.println("This is the AI version of the game, in which you can play the checker game by yourself. AI will control the x pieces and you will control the o pieces.");
 		System.out.println("To move your pieces, enter the piece coordinates of the piece you want to move, then enter, then the spot you want to move it to. You can also use retract, and then enter how many steps you want to move back.");
 
 		CheckersBoard c = new CheckersBoard();
