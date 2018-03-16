@@ -30,6 +30,14 @@ Also will include: A basic AI and fix some issues in build.xmli (the old version
 Orginal:A GUI that allows two players to play checkers against each other, also will include ability to get a "king" to move around freely from F17.
 Basic classes for Checkers, Non-GUI. Plus a J-Unit Test similar to Lab 07 from S11:
 
+W18 Final Remarks:
+The version that we got from F17 also has a lot issues. We reorganized the build.xml file, and fixed some logical bugs. We added a stack to record history and improved the gui messaging.
+
+We added a basic AI. Due to the time limit, the AI is very basic. I believe there is a lot can be done for the AI part, such as saving all AI pieces's location into an arraylist and then find the possible moves for one of these pieces.
+So I would suggest that you can start from Indicate Possible Moves (Issue #10)
+
+My recommendation is that you can also get some easy points by improving the gui version, such as adding pictures and make it look better. After that you can fix the jump and double jump issues which I did not touch on.
+
 F17 Final Remarks:
 
 Current version contains working command line and gui version.
