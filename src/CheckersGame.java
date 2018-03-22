@@ -82,4 +82,6 @@ public interface CheckersGame {
 	
 	public void retractgui(int times);
 
+	public char returnhis(int i, int j);
+
 }

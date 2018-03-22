@@ -12,7 +12,7 @@ import java.util.*;
 public class CheckersBoard implements CheckersGame {
 
 	// BOARD VARS
-	private char[][] pieces         = new char[8][8]; // 2D array of pieces
+    private ArrayList<ArrayList<CheckersPiece>> pieces = new ArrayList<ArrayList<CheckersPiece>>();   // 2D array of pieces
 	private char turn               = 'x';            // x alwayds starts
 	private char winner             = ' ';            // changed to either x,o, or t at end of game
 	private int xCount              = 12;             // count of x pieces
@@ -40,7 +40,7 @@ public class CheckersBoard implements CheckersGame {
 	private boolean canJump         = false;          // true if can jump, false if not
 	private boolean validMove       = false;
 
-	private Stack<char [][]> history=new Stack<char [][]>();
+    private Stack<char[][]> history = new Stack<char[][]>();
     private Stack<Integer> xstack = new Stack<Integer>();
 	private Stack<Integer> ostack = new Stack<Integer>();
 	private Stack<Integer> kingstack = new Stack<Integer>();
@@ -51,25 +51,47 @@ public class CheckersBoard implements CheckersGame {
 	*
 	*/
 	public CheckersBoard() {
+		for (int i = 0; i < 8; i++){
+			ArrayList<CheckersPiece> l1 = new ArrayList<CheckersPiece>();
+			pieces.add(l1);
+		}
+
+		
 		for (int j = 0; j < 8; j++) {
 			if (j % 2 == 0) {
-				pieces[0][j] = ' ';
-				pieces[1][j] = 'o';
-				pieces[2][j] = ' ';
-				pieces[3][j] = ' ';
-				pieces[4][j] = ' ';
-				pieces[5][j] = 'x';
-				pieces[6][j] = ' ';
-				pieces[7][j] = 'x';
+			    CheckersPiece a1 = new CheckersPiece(' ',0,j,false);
+			    pieces.get(0).add(j,a1);
+			    CheckersPiece a2 = new CheckersPiece('o',1,j,false);
+			    pieces.get(1).add(j,a2);
+			    CheckersPiece a3 = new CheckersPiece(' ',2,j,false);
+			    pieces.get(2).add(j,a3);
+			    CheckersPiece a4 = new CheckersPiece(' ',3,j,false);
+			    pieces.get(3).add(j,a4);
+			    CheckersPiece a5 = new CheckersPiece(' ',4,j,false);
+			    pieces.get(4).add(j,a5);
+			    CheckersPiece a6 = new CheckersPiece('x',5,j,false);
+			    pieces.get(5).add(j,a6);
+			    CheckersPiece a7 = new CheckersPiece(' ',6,j,false);
+			    pieces.get(6).add(j,a7);
+			    CheckersPiece a8 = new CheckersPiece('x',7,j,false);
+			    pieces.get(7).add(j,a8);
 			} else {
-				pieces[0][j] = 'o';
-				pieces[1][j] = ' ';
-				pieces[2][j] = 'o';
-				pieces[3][j] = ' ';
-				pieces[4][j] = ' ';
-				pieces[5][j] = ' ';
-				pieces[6][j] = 'x';
-				pieces[7][j] = ' ';
+			    CheckersPiece b1 = new CheckersPiece('o',0,j,false);
+			    pieces.get(0).add(j,b1);
+			    CheckersPiece b2 = new CheckersPiece(' ',1,j,false);
+			    pieces.get(1).add(j,b2);
+			    CheckersPiece b3 = new CheckersPiece('o',2,j,false);
+			    pieces.get(2).add(j,b3);
+			    CheckersPiece b4 = new CheckersPiece(' ',3,j,false);
+			    pieces.get(3).add(j,b4);
+			    CheckersPiece b5 = new CheckersPiece(' ',4,j,false);
+			    pieces.get(4).add(j,b5);
+			    CheckersPiece b6 = new CheckersPiece(' ',5,j,false);
+			    pieces.get(5).add(j,b6);
+			    CheckersPiece b7 = new CheckersPiece('x',6,j,false);
+			    pieces.get(6).add(j,b7);
+			    CheckersPiece b8 = new CheckersPiece(' ',7,j,false);
+			    pieces.get(7).add(j,b8);
 			}
 		}
 	}
@@ -86,13 +108,14 @@ public class CheckersBoard implements CheckersGame {
 	
 	}
 	public void recordHistory(){
-		char[][] temp = new char[8][8];
+	    char[][] temp = new char[8][8];
 		for(int i=0; i<8; i++){
 			for(int j=0; j<8; j++){
-				temp[i][j]=pieces[i][j];
-			
+				temp[i][j]=pieces.get(i).get(j).getName();
 			}
 		}
+	    //ArrayList<ArrayList<CheckersPiece>> temp = new ArrayList<ArrayList<CheckersPiece>>();
+	    //temp = pieces;
 		int tempo=oCount;
 		int tempx=xCount;
 		int tempk=kingOffset;
@@ -111,7 +134,15 @@ public class CheckersBoard implements CheckersGame {
 
 			hisText.remove(hisText.size()-1);
 		}
-		pieces=history.pop();
+
+		char m[][]=new char[8][8];
+		m=history.pop();
+
+		for(int i=0; i<8; i++){
+			for(int j=0; j<8; j++){
+				pieces.get(i).get(j).setName(m[i][j]);
+			}
+		}
 		resetMoves();
 		oCount=ostack.pop();
 		xCount=xstack.pop();
@@ -128,13 +159,21 @@ public class CheckersBoard implements CheckersGame {
 	}
 
 	public void retractgui(int times){
-		pieces=history.pop();
+		//pieces=history.pop();
+		char m[][]=new char[8][8];
+		m=history.pop();
+
+		for(int i=0; i<8; i++){
+			for(int j=0; j<8; j++){
+				pieces.get(i).get(j).setName(m[i][j]);
+			}
+		}
 		resetMoves();
 		oCount=ostack.pop();
 		xCount=xstack.pop();
 		kingOffset=kingstack.pop();
 		//validMove=true;
-	
+		
 		if(turn=='x')
 			turn='o';
 		else{
@@ -157,7 +196,7 @@ public class CheckersBoard implements CheckersGame {
 			result += "\n-+---+---+---+---+---+---+---+---+\n";
 			result += Integer.toString(i + 1) + "|";
 			for (int j = 0; j < 8; j++) {
-				result += " " +  pieces[i][j] + " |";
+			    result += " " +  pieces.get(i).get(j).getName() + " |";
 			}
 		}
 		result += "\n-+---+---+---+---+---+---+---+---+\n";
@@ -186,27 +225,54 @@ public class CheckersBoard implements CheckersGame {
 
 	public int getOCount() { return oCount; }
 
-	public char getPiece(int i, int j) { return pieces[i][j]; }
+	public char getPiece(int i, int j) { return pieces.get(i).get(j).getName(); }
 
 	// MOVEMENT FUNCTIONS 
 
 	public void move(int fromI, int fromJ, int toI, int toJ) {
 		setMoves(fromI, fromJ);
+		if(validMove==false){
+			return;
+		}
 		validMove(toI, toJ);
 
 		if (validMove) { // Valid coordinates input, execute the move
-			pieces[toI][toJ] = pieces[fromI][fromJ];
-			pieces[fromI][fromJ] = ' ';
+			//recordHistory();
+		    pieces.get(toI).get(toJ).setName(pieces.get(fromI).get(fromJ).getName());
+		    pieces.get(fromI).get(fromJ).setName(' ');
 			if (canJump) { // Remove the jumped over piece
 				if (turn == 'x') oCount--;
 				else xCount--;
-				pieces[jumpedI][jumpedJ] = ' ';
+				pieces.get(jumpedI).get(jumpedJ).setName(' ');
 			}
 			if (makeKing(toI, toJ)) {
-				pieces[toI][toJ] = Character.toUpperCase(pieces[toI][toJ]);
+			    pieces.get(toI).get(toJ).setName(Character.toUpperCase(pieces.get(toI).get(toJ).getName()));
 			}
 		}
 	}
+	public void moveAI(int fromI, int fromJ, int toI, int toJ) {
+                setMovesAI(fromI, fromJ);
+                if(validMove==false){
+                        return;
+                }
+                validMove(toI, toJ);
+
+                if (validMove) { // Valid coordinates input, execute the move
+                        //recordHistory();
+                    pieces.get(toI).get(toJ).setName(pieces.get(fromI).get(fromJ).getName());
+                    pieces.get(fromI).get(fromJ).setName(' ');
+                        if (canJump) { // Remove the jumped over piece
+                                if (turn == 'x') oCount--;
+                                else xCount--;
+                                pieces.get(jumpedI).get(jumpedJ).setName(' ');
+                        }
+                        if (makeKing(toI, toJ)) {
+                            pieces.get(toI).get(toJ).setName(Character.toUpperCase(pieces.get(toI).get(toJ).getName()));
+                        }
+                }
+        }
+
+
 
 	public boolean moveWasMade() { return validMove; }
 
@@ -221,6 +287,7 @@ public class CheckersBoard implements CheckersGame {
 			validMove = false;
 			return;
 		}
+		if(correctOwner(fromI, fromJ)) validMove=true;
 
 		if (turn == 'x') forwardOffset      = X_MOVEMENT;
 		else forwardOffset                  = O_MOVEMENT;
@@ -234,7 +301,7 @@ public class CheckersBoard implements CheckersGame {
 		jumpLeft    = fromJ + LEFT_OFFSET   * JUMP_FACTOR;
 		jumpRight   = fromJ + RIGHT_OFFSET  * JUMP_FACTOR;
 
-		if (Character.toUpperCase(turn) == pieces[fromI][fromJ]) {
+		if (Character.toUpperCase(turn) == pieces.get(fromI).get(fromJ).getName()) {
 			backward     = fromI + kingOffset;
 			jumpBackward = fromI + kingOffset * JUMP_FACTOR;
 		} else { // Non kings cannot move backward
@@ -242,6 +309,38 @@ public class CheckersBoard implements CheckersGame {
 			jumpBackward = -1;
 		}
 	}
+
+
+        private void setMovesAI(int fromI, int fromJ) {
+                if (!correctOwner(fromI, fromJ)) {
+                        //          throw new CheckersIllegalMoveException("Thats not your piece");
+                        validMove = false;
+                        return;
+                }
+                if(correctOwner(fromI, fromJ)) validMove=true;
+
+                if (turn == 'x') forwardOffset      = X_MOVEMENT;
+                else forwardOffset                  = O_MOVEMENT;
+                kingOffset = forwardOffset * -1;
+
+                forward = fromI + forwardOffset;
+                left    = fromJ + LEFT_OFFSET;
+                right   = fromJ + RIGHT_OFFSET;
+
+                jumpForward = fromI + forwardOffset * JUMP_FACTOR;
+                jumpLeft    = fromJ + LEFT_OFFSET   * JUMP_FACTOR;
+                jumpRight   = fromJ + RIGHT_OFFSET  * JUMP_FACTOR;
+
+                if (Character.toUpperCase(turn) == pieces.get(fromI).get(fromJ).getName()) {
+                        backward     = fromI + kingOffset;
+                        jumpBackward = fromI + kingOffset * JUMP_FACTOR;
+                } else { // Non kings cannot move backward
+                        backward         = -1;
+                        jumpBackward = -1;
+                }
+        }
+
+
 
 	private void validMove(int toI, int toJ) {
 		boolean validLatMove, validLongMove, validLatJump, validLongJump;
@@ -261,7 +360,7 @@ public class CheckersBoard implements CheckersGame {
 	}
 
 	private void squareOpen(int i, int j) {
-		validMove = (pieces[i][j] == ' ');
+	    validMove = (pieces.get(i).get(j).getName() == ' ');
 	}
 
 	/** Checks if the index you are moving from is owned by the correct owner
@@ -269,13 +368,13 @@ public class CheckersBoard implements CheckersGame {
 	 * @return True if you own the spot, or False if you do not own it
 	 */
 	private boolean correctOwner(int i, int j) {
-		return ( (turn == pieces[i][j]) ||
-			(Character.toUpperCase(turn) == pieces[i][j]) );
+	    return ( (turn == pieces.get(i).get(j).getName()) ||
+			(Character.toUpperCase(turn) == pieces.get(i).get(j).getName()) );
 	}
 
 	private void jumped(int i, int j) {
-		if (turn == 'x') validMove = ((pieces[i][j] == 'o') || (pieces[i][j] == 'O'));
-		else validMove = ((pieces[i][j] == 'x') || (pieces[i][j] == 'X') );
+	    if (turn == 'x') validMove = ((pieces.get(i).get(j).getName() == 'o') || (pieces.get(i).get(j).getName() == 'O'));
+		else validMove = ((pieces.get(i).get(j).getName() == 'x') || (pieces.get(i).get(j).getName() == 'X') );
 	}
 
 	/** Checks if the user input a valid jump, sets validMove to whether it was
@@ -357,5 +456,13 @@ public class CheckersBoard implements CheckersGame {
 		canJump = false;
 		validMove = false;
 	}
+
+	public char returnhis(int i, int j){
+		char[][] t = new char[8][8];
+		t = history.peek();
+		char a = t[i][j];
+		return a;
+	}
+
 
 }//end class CheckersBoard

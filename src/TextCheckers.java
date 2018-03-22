@@ -20,11 +20,10 @@ public class TextCheckers {
 		String input2;
 		int times = 1;
 		boolean check;
-
 		System.out.println("To play, enter the piece coordinates of the piece you want to move, then enter, then the spot you want to move it to. You can also use retract, and then enter how many steps you want to move back.");
-
+		System.out.println("When entering the coordinate, there is no case sensitive. Moreover, there is no preferance for the order of the coordinate, such as (A6) and (6A) indicates the same coordinate.");
 		CheckersBoard c = new CheckersBoard();
-
+		
 		while (!done) {
 			System.out.println(c); // c.toString() implicitly invoked
 			System.out.println("" + c.getTurn() + "'s turn: ");
