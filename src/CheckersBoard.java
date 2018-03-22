@@ -1,5 +1,7 @@
 package edu.ucsb.cs56.projects.games.checkers;
 
+import java.util.*;
+
 /** A series of JUnit tests to test checkerboard and moves
    @author Ryan Kroner
    @author Graham Foster
@@ -38,8 +40,11 @@ public class CheckersBoard implements CheckersGame {
 	private boolean canJump         = false;          // true if can jump, false if not
 	private boolean validMove       = false;
 
-
-
+	private Stack<char [][]> history=new Stack<char [][]>();
+    private Stack<Integer> xstack = new Stack<Integer>();
+	private Stack<Integer> ostack = new Stack<Integer>();
+	private Stack<Integer> kingstack = new Stack<Integer>();
+	private ArrayList<String> hisText=new ArrayList<String>();
 	// BOARD FUNCTIONS
 
 	/**
@@ -68,6 +73,78 @@ public class CheckersBoard implements CheckersGame {
 			}
 		}
 	}
+/////////////////////////////////////////////////////////////////
+	public void recordText(String s1, String s2){
+		hisText.add(turn+" moved from "+s1+" to "+s2);
+	
+	}
+
+	public void printText(){
+		for(int i=0; i<hisText.size();i++){
+			System.out.println(i+": "+hisText.get(i));
+		}
+	
+	}
+	public void recordHistory(){
+		char[][] temp = new char[8][8];
+		for(int i=0; i<8; i++){
+			for(int j=0; j<8; j++){
+				temp[i][j]=pieces[i][j];
+			
+			}
+		}
+		int tempo=oCount;
+		int tempx=xCount;
+		int tempk=kingOffset;
+		history.push(temp);
+		ostack.push(tempo);
+		xstack.push(tempx);
+		kingstack.push(tempk);
+	}
+
+	public void retract(int times){
+		for(int i=times;i>0;i--){
+			history.pop();
+			ostack.pop();
+			xstack.pop();
+			kingstack.pop();
+
+			hisText.remove(hisText.size()-1);
+		}
+		pieces=history.pop();
+		resetMoves();
+		oCount=ostack.pop();
+		xCount=xstack.pop();
+		kingOffset=kingstack.pop();
+		//validMove=true;
+		if(times%2==0){
+			if(turn=='x')
+				turn='o';
+			else{
+				turn='x';
+			}
+		}
+	
+	}
+
+	public void retractgui(int times){
+		pieces=history.pop();
+		resetMoves();
+		oCount=ostack.pop();
+		xCount=xstack.pop();
+		kingOffset=kingstack.pop();
+		//validMove=true;
+	
+		if(turn=='x')
+			turn='o';
+		else{
+			turn='x';
+			}
+		
+	
+	}
+
+////////////////////////////////////////////////////////////////////	
 
 	/** A toString method for the CheckersBoard, allows easier access for console based interface
 	 * @return result The result of the toString(), aka the gameBoard

@@ -10,7 +10,7 @@ import javax.swing.JTextArea;
  */
 public class JTextAreaMessageDestination extends JTextArea implements MessageDestination
 {
-    /** 
+    /*
 	Create a JTextArea that implements the MessageDestination interface.  This is a direct
 	pass-thru to the JTextArea constructor.
 
